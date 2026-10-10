@@ -17,13 +17,21 @@ alwaysApply: false
 
 ## Tauri příkazy
 ```rust
-// ✅ tenký příkaz, logika v core, typovaná chyba serializovaná pro UI
+// ✅ tenký příkaz, logika v core, I/O mimo async runtime, typovaná chyba pro UI
 #[tauri::command]
 #[specta::specta]
-pub async fn list_volumes(state: State<'_, AppState>) -> Result<Vec<VolumeInfo>, AppError> {
-    Ok(backup_core::volumes::enumerate()?)
+pub async fn list_volumes(state: State<'_, AppState>) -> AppResult<VolumesOverview> {
+    let state = state.inner().clone();
+    blocking(move || {
+        let live = volumes::enumerate()?;
+        Ok(volumes::overview(&state.config()?.config().volumes, live))
+    })
+    .await
 }
 ```
+- Změny konfigurace jen přes `ConfigStore::update(|c| …)` (transakční zápis).
+- `u64` pole pro UI: `#[specta(type = specta_typescript::Number)]` (hodnoty < 2^53).
+- Testovací data jen z `crate::test_support` (fiktivní disky).
 
 ## Testy
 - Unit testy vedle kódu (`#[cfg(test)]`), integrační v `crates/backup-core/tests/`.

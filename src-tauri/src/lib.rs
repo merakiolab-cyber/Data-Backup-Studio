@@ -1,12 +1,24 @@
 mod commands;
 mod error;
+mod state;
 
+use backup_core::storage::ConfigStore;
+use tauri::Manager;
 use tauri_specta::{Builder, collect_commands};
+
+use crate::state::AppState;
 
 const BINDINGS_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../src/lib/bindings.ts");
 
 fn specta_builder() -> Builder<tauri::Wry> {
-    Builder::<tauri::Wry>::new().commands(collect_commands![commands::app::app_info])
+    Builder::<tauri::Wry>::new().commands(collect_commands![
+        commands::app::app_info,
+        commands::volumes::list_volumes,
+        commands::volumes::register_volume,
+        commands::volumes::rename_volume,
+        commands::volumes::unregister_volume,
+        commands::volumes::confirm_volume,
+    ])
 }
 
 fn export_bindings(builder: &Builder<tauri::Wry>) -> Result<(), String> {
@@ -28,6 +40,8 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            let config_dir = app.path().app_config_dir()?;
+            app.manage(AppState::new(ConfigStore::open(&config_dir)?));
             Ok(())
         })
         .run(tauri::generate_context!());

@@ -6,6 +6,15 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 ## [Unreleased]
 
 ### Přidáno
+- **Disky (fáze 2)**: aplikace načte připojené disky z Windows včetně sběrnice (USB/SATA/NVMe),
+  modelu, sériového čísla a volného místa. Disk jde zaregistrovat jako cílový – do jeho kořene
+  se zapíše skrytá značka `.databackupstudio\volume.json` a disk je pak rozpoznán pod jakýmkoli písmenem.
+- Stav registrovaného disku: připojený (s aktuálním písmenem), nepřipojený, nebo „potřebuje ověřit“
+  (změněné sériové číslo, chybějící značka, dva disky se stejnou identitou) s tlačítkem „Potvrdit disk“.
+- Přejmenování a odebrání disku z aplikace (data na disku zůstávají).
+- Konfigurace `config.json` v `%APPDATA%\app.databackupstudio\` s transakčním atomickým zápisem a zálohou `.bak`.
+- Diagnostický příklad `cargo run -p backup-core --example list_volumes`.
+- Testy: 25 v jádře (resolver, značka, registr, konfigurace), frontend testy obrazovky Disky a formátování velikostí.
 - Kostra aplikace (fáze 1): Tauri 2.12 + React 19 + TypeScript 7 (strict) + Vite 8, pnpm 12.
 - Cargo workspace: `crates/backup-core` (logika bez Tauri) a `src-tauri` (tenký shell).
 - Typově bezpečné volání backendu přes tauri-specta; `src/lib/bindings.ts` generuje
@@ -23,7 +32,9 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ### Poznámky
 - Vite dev server běží na portu **1427** (1420 obsazuje jiný projekt).
+- Aplikace spuštěná AI agentem běží v izolovaném prostředí a okno není vidět – vizuální kontrolu
+  dělá uživatel přes `pnpm tauri dev`.
 
 ### Další krok
-- Fáze 2 – enumerace svazků přes Win32 API (`crates/backup-core/src/volumes/`),
-  registrace cílového disku značkovým souborem a obrazovka „Disky“.
+- Ruční test fáze 2 se skutečnými USB disky (registrace, přepojení → jiné písmeno, stav se nezmění).
+- Fáze 3 – úlohy: doména `Job`/`Location`, uložení do `config.json`, editor úlohy a přehled.

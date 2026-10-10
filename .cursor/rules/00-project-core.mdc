@@ -31,4 +31,5 @@ Scope: `engine`, `volumes`, `jobs`, `storage`, `ui`, `tauri`, `build`, `docs`.
 - Do repa nikdy nedávej osobní data: skutečné cesty uživatele, názvy/sériová čísla jeho disků,
   exporty konfigurace, logy, `history.db`, screenshoty s reálnými složkami.
 - Testy a příklady jen s fiktivními daty (`D:\Fotky`, „WD Elements 2 TB“, serial `0x1234ABCD`).
-- Uživatelská data patří jen do `%APPDATA%\DataBackupStudio\` (mimo repo).
+- Uživatelská data patří jen do `%APPDATA%\app.databackupstudio\` (Tauri `app_config_dir`, mimo repo).
+- Diagnostický výstup (`cargo run -p backup-core --example list_volumes`) nikdy nevkládej do souborů v repu.

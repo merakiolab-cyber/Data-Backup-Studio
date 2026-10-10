@@ -2,7 +2,13 @@
 //!
 //! This crate has no dependency on Tauri so it can be tested in isolation.
 
+pub mod domain;
 pub mod error;
+pub mod storage;
+pub mod volumes;
+
+#[cfg(test)]
+mod test_support;
 
 pub use error::{CoreError, CoreResult};
 

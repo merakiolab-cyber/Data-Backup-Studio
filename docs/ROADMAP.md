@@ -18,10 +18,12 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Windows manifest (Common Controls v6, long paths, DPI) pro aplikaci i testy
 
 ## Fáze 2 – Disky (identita svazků)
-- [ ] Enumerace svazků (písmeno, jmenovka, sériové č., GUID, velikost, volné místo, typ)
-- [ ] Registrace cílového disku (značkový soubor `.databackupstudio/volume.json`)
-- [ ] Resolver `VolumeRef → aktuální písmeno` + varování při nesouladu
-- [ ] Obrazovka „Disky“ s živým stavem připojení
+- [x] Enumerace svazků (písmeno, jmenovka, sériové č., GUID, velikost, volné místo, typ, sběrnice, model)
+- [x] Registrace cílového disku (značkový soubor `.databackupstudio/volume.json`)
+- [x] Resolver `VolumeRef → aktuální písmeno` + varování při nesouladu a potvrzení disku
+- [x] Obrazovka „Disky“ s živým stavem připojení, přejmenování, odebrání
+- [ ] Ruční test se skutečnými USB disky (registrace, přepojení do jiného portu → jiné písmeno)
+- [ ] Později: místo pollingu reagovat na `WM_DEVICECHANGE` (nebudit spící USB disky)
 
 ## Fáze 3 – Úlohy (pravidla)
 - [ ] Doména `Job`, `Location`, validace

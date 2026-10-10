@@ -114,6 +114,18 @@ flowchart LR
 
 UI průběžně ukazuje, které registrované disky jsou připojené a pod jakým písmenem.
 
+### Implementace (fáze 2)
+- `volumes/win.rs` – jediné místo s `unsafe`: `FindFirstVolumeW`, `GetVolumePathNamesForVolumeNameW`,
+  `GetVolumeInformationW`, `GetDiskFreeSpaceExW`, `GetDriveTypeW` a `IOCTL_STORAGE_QUERY_PROPERTY`
+  (typ sběrnice USB/SATA/NVMe a model disku; bez admin práv).
+- `volumes/marker.rs` – čtení/zápis značky (atomicky, složka skrytá).
+- `volumes/resolve.rs` – čistá funkce `resolve()` a `overview()`; stavy `connected`,
+  `needsConfirmation` (`serialChanged`, `markerMissing`, `duplicate`), `disconnected`.
+- `volumes/registry.rs` – registrace, přejmenování, odebrání, potvrzení disku.
+- `storage/config.rs` – `ConfigStore.update()` je transakční: změna na kopii → atomický zápis → teprve pak v paměti.
+- Příkazy dostávají `guid_path`/`id`, nikdy cestu; svazek se vždy dohledá v čerstvé enumeraci.
+- UI obnovuje seznam disků každé 4 s (jen když je okno aktivní).
+
 ## 5. Záložní engine
 
 Průběh jedné úlohy:
@@ -155,7 +167,8 @@ Průběh jedné úlohy:
 
 - Release build = NSIS instalátor s přibaleným offline WebView2 + portable `.exe`.
 - Instalátor se archivuje v `releases/` (mimo git) a doporučeně i na každém zálohovacím disku.
-- Konfigurace je v `%APPDATA%\DataBackupStudio\config.json` + export do souboru.
+- Konfigurace je v `%APPDATA%\app.databackupstudio\config.json` (+ `config.json.bak` s předchozí
+  verzí) a půjde exportovat do souboru.
 - Volitelně `cargo vendor` + pnpm store pro build bez internetu (viz skill `release-offline`).
 
 ## 8. Datový model (zjednodušeně)

@@ -22,7 +22,7 @@ thiserror.workspace = true
 tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
-specta-typescript = "0.0.12"
+specta-typescript.workspace = true
 
 [lints]
 workspace = true

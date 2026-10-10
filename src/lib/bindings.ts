@@ -5,15 +5,98 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 /** Commands */
 export const commands = {
 	appInfo: () => typedError<AppInfo, AppError>(__TAURI_INVOKE("app_info")),
+	listVolumes: () => typedError<VolumesOverview, AppError>(__TAURI_INVOKE("list_volumes")),
+	/**  `guid_path` identifies the volume; it is looked up in a fresh enumeration, never trusted as a path. */
+	registerVolume: (guidPath: string, name: string) => typedError<RegisteredVolume, AppError>(__TAURI_INVOKE("register_volume", { guidPath, name })),
+	renameVolume: (id: VolumeId, name: string) => typedError<null, AppError>(__TAURI_INVOKE("rename_volume", { id, name })),
+	unregisterVolume: (id: VolumeId) => typedError<null, AppError>(__TAURI_INVOKE("unregister_volume", { id })),
+	confirmVolume: (id: VolumeId) => typedError<null, AppError>(__TAURI_INVOKE("confirm_volume", { id })),
 };
 
 /* Types */
 /**  Error returned to the frontend. Messages are user-facing (Czech); details go to the log. */
-export type AppError = { kind: "Internal"; message: string };
+export type AppError = { kind: "NotFound"; message: string } | { kind: "InvalidInput"; message: string } | { kind: "Conflict"; message: string } | { kind: "Io"; message: string } | { kind: "Internal"; message: string };
 
 export type AppInfo = {
 	version: string,
 	coreVersion: string,
+};
+
+export type BusKind = "usb" | "sata" | "nvme" | "sd" | "other" | "unknown";
+
+export type ConfirmReason = 
+/**  Marker matches but the serial number differs (disk was cloned or marker copied). */
+"serialChanged" | 
+/**  Serial matches but the marker is gone (deleted or folder cleaned up). */
+"markerMissing" | 
+/**  More than one connected volume carries this identity. */
+"duplicate";
+
+export type DriveKind = "fixed" | "removable" | "optical" | "ram" | "unknown";
+
+/**  A volume currently mounted on this PC. */
+export type LiveVolume = {
+	/**  `\\?\Volume{GUID}\` */
+	guidPath: string,
+	/**  Root path such as `E:\` (may also be a folder mount point). */
+	mountPoint: string,
+	label: string,
+	serial: number,
+	fileSystem: string,
+	driveKind: DriveKind,
+	bus: BusKind,
+	/**  Vendor and product reported by the device, e.g. `WD Elements 25A2`. */
+	model: string | null,
+	totalBytes: number,
+	freeBytes: number,
+	/**  Volume containing the Windows directory. */
+	isSystem: boolean,
+	isExternal: boolean,
+	marker: VolumeMarker | null,
+};
+
+/**
+ *  A backup target volume remembered by the application.
+ * 
+ *  Byte counts and timestamps are exported to TypeScript as `number`; they stay far below 2^53
+ *  (9 PB / year 287 396), so the precision loss specta warns about cannot happen.
+ */
+export type RegisteredVolume = {
+	id: VolumeId,
+	name: string,
+	/**  Volume serial number at registration time (changes only when reformatted). */
+	serial: number,
+	/**  `\\?\Volume{GUID}\` path, stable on this PC. */
+	guidPath: string,
+	fileSystem: string,
+	model: string | null,
+	totalBytes: number,
+	registeredAtMs: number,
+};
+
+export type RegisteredVolumeView = {
+	volume: RegisteredVolume,
+	status: VolumeStatus,
+	live: LiveVolume | null,
+};
+
+/**  Stable identity of a registered volume, independent of its drive letter. */
+export type VolumeId = string;
+
+/**  Content of `<root>\.databackupstudio\volume.json` written to every registered target. */
+export type VolumeMarker = {
+	version: number,
+	id: VolumeId,
+	name: string,
+	createdAtMs: number,
+};
+
+export type VolumeStatus = { state: "connected" } | { state: "needsConfirmation"; reason: ConfirmReason } | { state: "disconnected" };
+
+export type VolumesOverview = {
+	registered: RegisteredVolumeView[],
+	/**  Mounted volumes not matched to any registered volume. */
+	available: LiveVolume[],
 };
 
 /* Tauri Specta runtime */
