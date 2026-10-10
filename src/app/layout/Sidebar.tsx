@@ -11,6 +11,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router';
+import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { useVolumes } from '@/features/volumes/api';
 
@@ -59,6 +60,9 @@ export function Sidebar() {
           placeItems: 'center',
           bgcolor: ds(theme).ink,
           color: ds(theme).mint,
+          animation: `${popIn} 500ms ${ease.spring} backwards`,
+          '& svg': { transition: `transform 600ms ${ease.spring}` },
+          '&:hover svg': { transform: 'rotate(-160deg)' },
         })}
       >
         <DatabaseBackup size={24} />
@@ -129,10 +133,12 @@ function RailLink({ item, badge }: { item: NavItem; badge: number }) {
                   transition: theme.transitions.create(['background-color', 'color'], {
                     duration: theme.transitions.duration.shorter,
                   }),
+                  '& svg': { transition: `transform ${duration.hover}ms ${ease.spring}` },
                   '&:hover': {
                     color: ds(theme).ink,
                     bgcolor: isActive ? undefined : ds(theme).muted,
                   },
+                  '&:hover svg': { transform: 'translateY(-2px)' },
                 })}
               >
                 <Icon size={22} />

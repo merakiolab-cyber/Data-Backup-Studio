@@ -5,6 +5,8 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { HardDrive, Monitor, Plus, Usb } from 'lucide-react';
 import { useState } from 'react';
+import { hoverLift, stagger } from '@/app/theme/motion';
+import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { LiveVolume } from '@/lib/bindings';
 import { driveLabel, formatBytes } from '@/lib/format';
@@ -23,7 +25,7 @@ export function AvailableVolumeList({ volumes }: { volumes: LiveVolume[] }) {
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, ...stagger(40) }}>
         {volumes.map((volume) => (
           <AvailableVolumeRow
             key={volume.guidPath}
@@ -68,7 +70,16 @@ function AvailableVolumeRow({
   const Icon = volume.isSystem ? Monitor : volume.isExternal ? Usb : HardDrive;
 
   return (
-    <Card sx={{ display: 'flex', alignItems: 'center', gap: 2.5, px: 2.5, py: 2 }}>
+    <Card
+      sx={(theme) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2.5,
+        px: 2.5,
+        py: 2,
+        ...hoverLift(ds(theme).shadowRaised),
+      })}
+    >
       <IconBubble size={56} tone="muted">
         <Icon size={24} />
       </IconBubble>

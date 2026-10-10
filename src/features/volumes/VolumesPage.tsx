@@ -7,6 +7,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { HardDrive, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { ease, spin, stagger } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { Page } from '@/components/Page';
 import { Section } from '@/components/Section';
@@ -18,6 +20,12 @@ import { RegisteredVolumeCard } from './components/RegisteredVolumeCard';
 
 export function VolumesPage() {
   const volumes = useVolumes();
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = async () => {
+    setRefreshing(true);
+    await Promise.all([volumes.refetch(), new Promise((r) => setTimeout(r, 600))]);
+    setRefreshing(false);
+  };
 
   return (
     <Page
@@ -27,8 +35,13 @@ export function VolumesPage() {
         <Tooltip title="Načíst disky znovu">
           <IconButton
             aria-label="Načíst disky znovu"
-            onClick={() => volumes.refetch()}
-            disabled={volumes.isFetching}
+            onClick={refresh}
+            disabled={refreshing}
+            sx={{
+              '& svg': {
+                animation: refreshing ? `${spin} 700ms ${ease.standard} infinite` : 'none',
+              },
+            }}
           >
             <RefreshCw size={20} />
           </IconButton>
@@ -66,6 +79,7 @@ export function VolumesPage() {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
                   gap: 2,
+                  ...stagger(),
                 }}
               >
                 {volumes.data.registered.map((view) => (

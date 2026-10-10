@@ -1,6 +1,8 @@
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
+import { ease } from '@/app/theme/motion';
 import { SplitValue } from '@/components/SplitValue';
 import { formatBytes } from '@/lib/format';
 
@@ -13,6 +15,13 @@ interface CapacityBarProps {
 export function CapacityBar({ totalBytes, freeBytes }: CapacityBarProps) {
   const usedPercent = totalBytes > 0 ? ((totalBytes - freeBytes) / totalBytes) * 100 : 0;
   const nearlyFull = usedPercent >= 90;
+  // Start empty and fill right after mount so the bar grows in. A timer, not rAF:
+  // rAF pauses in hidden windows and the bar would stay empty.
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setShown(usedPercent), 30);
+    return () => clearTimeout(timer);
+  }, [usedPercent]);
 
   return (
     <Box>
@@ -25,12 +34,15 @@ export function CapacityBar({ totalBytes, freeBytes }: CapacityBarProps) {
       </Box>
       <LinearProgress
         variant="determinate"
-        value={usedPercent}
+        value={shown}
         aria-label="Zaplnění disku"
         sx={{
           height: 6,
           bgcolor: 'rgba(255, 255, 255, 0.55)',
-          '& .MuiLinearProgress-bar': { bgcolor: 'currentColor' },
+          '& .MuiLinearProgress-bar': {
+            bgcolor: 'currentColor',
+            transition: `transform 900ms ${ease.emphasized} 200ms`,
+          },
         }}
       />
     </Box>

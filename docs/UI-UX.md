@@ -38,7 +38,24 @@ s vlastními tokeny (rozhodnutí: [ADR 0004](decisions/0004-visual-style.md)). J
 - Ikony: **lucide-react**, tenká linka 1.6, v kulatých bublinách (`IconBubble`).
 
 ## Pohyb
-- Krátké přechody 150–250 ms. Respektovat `prefers-reduced-motion`.
+Mikroanimace jsou čisté CSS (`keyframes` z MUI), bez knihovny. Tokeny a pomocníci v
+`src/app/theme/motion.ts`:
+- Délky: stisk 120 ms, hover 200 ms, nástup 420 ms, počítání čísel 700 ms. Křivky `ease.standard`,
+  `ease.emphasized`, `ease.spring` (lehký překmit pro ikony a chipy).
+- `enter(delay)` – nástup obsahu (fade + posun nahoru), hlavička a list stránky přes `Page`.
+- `stagger(step)` – postupný nástup dětí mřížky/seznamu (max 12 kroků).
+- `hoverLift(shadowRaised)` – karta se při hoveru zvedne o 3 px a dostane výraznější stín.
+- Tlačítka se při stisku zmenší (0,96, ikonová 0,9); CTA se při hoveru zvedne.
+- Velká čísla dopočítávají (`useCountUp`, `SplitValue animate`), pruh kapacity se naplní,
+  „Připojeno“ / „Připraveno“ jemně pulzuje, obnovení disků točí ikonou, dialogy a chipy naskočí.
+
+Pravidla:
+- Nástupové animace vždy `animation-fill-mode: backwards`, nikdy `both` – konečný stav animace
+  by přebil `transform` z hoveru.
+- Výsledná hodnota nesmí záviset na `requestAnimationFrame` (v minimalizovaném okně se zastaví) –
+  `useCountUp` má časovou pojistku, pruh kapacity startuje časovačem.
+- `prefers-reduced-motion: reduce` vypne v `CssBaseline` všechny animace a přechody; čísla se
+  zobrazí rovnou konečná. Animace jsou jen ozdoba, nikdy nenesou informaci.
 
 ## Texty (mikrocopy)
 - Tykání, krátce, slovesem: „Spustit zálohu“, „Registrovat disk“.

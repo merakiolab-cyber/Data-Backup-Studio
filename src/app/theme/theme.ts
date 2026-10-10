@@ -1,4 +1,5 @@
 import { alpha, createTheme, type PaletteOptions, type Theme } from '@mui/material/styles';
+import { dialogIn, duration, ease, popIn, riseIn } from './motion';
 import { type DesignTokens, darkTokens, lightTokens } from './tokens';
 
 declare module '@mui/material/styles' {
@@ -30,7 +31,9 @@ function paletteFrom(t: DesignTokens, inverse: string): PaletteOptions {
   };
 }
 
-const easing = 'cubic-bezier(0.2, 0, 0, 1)';
+const pressTransition = ['transform', 'background-color', 'color', 'box-shadow']
+  .map((p) => `${p} ${p === 'transform' ? duration.press : duration.hover}ms ${ease.standard}`)
+  .join(', ');
 
 export const theme = createTheme({
   cssVariables: { colorSchemeSelector: 'class' },
@@ -52,7 +55,7 @@ export const theme = createTheme({
     caption: { fontSize: '0.75rem', fontWeight: 500, lineHeight: 1.35 },
   },
   transitions: {
-    easing: { easeInOut: easing, easeOut: easing },
+    easing: { easeInOut: ease.standard, easeOut: ease.emphasized },
     duration: { shortest: 150, shorter: 200, short: 250, standard: 300 },
   },
   components: {
@@ -71,15 +74,41 @@ export const theme = createTheme({
         '@media (prefers-reduced-motion: reduce)': {
           '*, *::before, *::after': {
             animationDuration: '0.01ms !important',
+            animationDelay: '0ms !important',
+            animationIterationCount: '1 !important',
             transitionDuration: '0.01ms !important',
+            scrollBehavior: 'auto !important',
           },
         },
       }),
     },
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          transition: pressTransition,
+          '&:active:not(.Mui-disabled)': { transform: 'scale(0.96)' },
+        },
+      },
+    },
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { borderRadius: 999, minHeight: 44, paddingInline: 22 },
+        root: {
+          borderRadius: 999,
+          minHeight: 44,
+          paddingInline: 22,
+          transition: pressTransition,
+          '& .MuiButton-startIcon svg': {
+            transition: `transform ${duration.hover}ms ${ease.spring}`,
+          },
+          '&:hover .MuiButton-startIcon svg': { transform: 'scale(1.15)' },
+        },
+        contained: ({ theme }) => ({
+          '&:hover:not(:active)': {
+            transform: 'translateY(-1px)',
+            boxShadow: ds(theme).shadowRaised,
+          },
+        }),
         sizeSmall: { minHeight: 34, paddingInline: 16, fontSize: '0.8125rem' },
         outlined: ({ theme }) => ({
           border: 'none',
@@ -98,6 +127,8 @@ export const theme = createTheme({
           border: `1px solid ${ds(theme).outline}`,
           color: ds(theme).ink,
           '&:hover': { backgroundColor: ds(theme).muted },
+          transition: pressTransition,
+          '&:active:not(.Mui-disabled)': { transform: 'scale(0.9)' },
         }),
         sizeSmall: { width: 36, height: 36 },
       },
@@ -121,6 +152,7 @@ export const theme = createTheme({
           borderRadius: 28,
           backgroundColor: ds(theme).surface,
           padding: 8,
+          animation: `${dialogIn} 320ms ${ease.emphasized}`,
         }),
       },
     },
@@ -149,6 +181,8 @@ export const theme = createTheme({
           fontWeight: 600,
           backgroundColor: ds(theme).muted,
           color: ds(theme).ink,
+          animation: `${popIn} 260ms ${ease.spring} backwards`,
+          transition: `background-color ${duration.hover}ms ${ease.standard}, transform ${duration.press}ms ${ease.standard}`,
         }),
         outlined: ({ theme }) => ({
           backgroundColor: 'transparent',
@@ -178,6 +212,7 @@ export const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: 20,
           alignItems: 'center',
+          animation: `${riseIn} 320ms ${ease.emphasized}`,
           color: ds(theme).onAccent,
           '& .MuiAlert-icon': { color: ds(theme).onAccent, opacity: 0.8 },
           '&.MuiAlert-colorWarning': { backgroundColor: ds(theme).lemon },

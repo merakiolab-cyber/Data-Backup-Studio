@@ -3,6 +3,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Typography from '@mui/material/Typography';
 import { CopyCheck, FilePlus2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { BackupMode } from '@/lib/bindings';
@@ -55,14 +56,19 @@ export function ModePicker({
                   : ds(theme).mint
                 : 'transparent',
               color: selected ? ds(theme).onAccent : 'inherit',
-              transition: 'background-color 150ms, border-color 150ms',
+              transition: `background-color ${duration.hover}ms ${ease.standard}, border-color ${duration.hover}ms ${ease.standard}, transform ${duration.press}ms ${ease.standard}`,
               '&:hover': { borderColor: selected ? 'transparent' : ds(theme).inkFaint },
               '&.Mui-focusVisible': { outline: `2px solid ${ds(theme).ink}`, outlineOffset: 2 },
             })}
           >
-            <IconBubble size={44} tone={selected ? 'glass' : 'muted'}>
-              {icons[mode]}
-            </IconBubble>
+            <Box
+              key={String(selected)}
+              sx={{ animation: selected ? `${popIn} 360ms ${ease.spring}` : 'none' }}
+            >
+              <IconBubble size={44} tone={selected ? 'glass' : 'muted'}>
+                {icons[mode]}
+              </IconBubble>
+            </Box>
             <Box>
               <Typography variant="subtitle1">{modeLabels[mode].title}</Typography>
               <Typography variant="body2" sx={{ opacity: 0.75 }}>

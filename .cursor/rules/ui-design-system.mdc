@@ -23,7 +23,10 @@ Plná specifikace: `docs/UI-UX.md`, rozhodnutí: `docs/decisions/0004-visual-sty
 - Prázdné stavy: ikona, jedna věta, jedna akce.
 - Texty česky, tykání, slovesem. Čísla a velikosti formátovat `cs-CZ` (`1,2 GB`, `12 345 souborů`).
 - Přístupnost: `aria-label` u ikonových tlačítek, viditelný fokus, kontrast AA, světlý i tmavý režim.
-- Animace 150–250 ms, respektovat `prefers-reduced-motion`.
+- Pohyb jen přes `src/app/theme/motion.ts` (`ease`, `duration`, `enter`, `stagger`, `hoverLift`,
+  keyframes) – žádné vlastní časy ani knihovny animací. Nástupy s fill mode `backwards`, nikdy `both`
+  (přebije hover `transform`). Konečný stav nesmí záviset na `requestAnimationFrame`.
+  `prefers-reduced-motion` řeší globálně `CssBaseline`; ve stagger selektorech `nth-of-type`, ne `nth-child`.
 
 ## Vizuální kontrola bez Tauri
 `pnpm dev` otevřený v běžném prohlížeči použije `src/dev/demoIpc.ts` (smyšlená data, jen v DEV).

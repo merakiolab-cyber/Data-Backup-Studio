@@ -29,6 +29,8 @@ export interface DesignTokens {
   sky: string;
   badge: string;
   shadow: string;
+  /** Shadow of a card lifted under the pointer. */
+  shadowRaised: string;
 }
 
 export const lightTokens: DesignTokens = {
@@ -58,6 +60,7 @@ export const lightTokens: DesignTokens = {
   sky: '#AEE3F4',
   badge: '#F2877C',
   shadow: '0 1px 2px rgba(18, 20, 23, 0.04), 0 4px 14px rgba(18, 20, 23, 0.035)',
+  shadowRaised: '0 2px 4px rgba(18, 20, 23, 0.04), 0 12px 28px rgba(18, 20, 23, 0.07)',
 };
 
 export const darkTokens: DesignTokens = {
@@ -86,4 +89,5 @@ export const darkTokens: DesignTokens = {
   sky: '#9BD3E4',
   badge: '#F2877C',
   shadow: '0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(0, 0, 0, 0.18)',
+  shadowRaised: '0 2px 4px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.3)',
 };

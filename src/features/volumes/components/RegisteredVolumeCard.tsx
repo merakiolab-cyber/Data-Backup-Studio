@@ -7,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { Ellipsis, HardDrive, Pencil, ShieldCheck, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { hoverLift } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { RegisteredVolumeView } from '@/lib/bindings';
@@ -58,6 +59,7 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
           bgcolor: background,
           color: onAccent ? t.onAccent : t.ink,
           boxShadow: onAccent ? 'none' : t.shadow,
+          ...hoverLift(t.shadowRaised),
         };
       }}
     >

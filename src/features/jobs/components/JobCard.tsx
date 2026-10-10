@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { duration, ease, hoverLift, pulseRing } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { DesignTokens } from '@/app/theme/tokens';
 import { IconBubble } from '@/components/IconBubble';
@@ -66,6 +67,9 @@ export function JobCard({ view }: { view: JobView }) {
         borderRadius: '28px',
         bgcolor: ds(theme).surface,
         boxShadow: ds(theme).shadow,
+        ...hoverLift(ds(theme).shadowRaised),
+        '& .job-arrow': { transition: `transform ${duration.hover * 2}ms ${ease.spring}` },
+        '&:hover .job-arrow': { transform: 'translateY(4px)' },
       })}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -93,7 +97,7 @@ export function JobCard({ view }: { view: JobView }) {
           view={view.source}
           relPath={job.source.relPath}
         />
-        <Box sx={{ pl: '12px', color: 'text.disabled' }} aria-hidden>
+        <Box className="job-arrow" sx={{ pl: '12px', color: 'text.disabled' }} aria-hidden>
           <ArrowDown size={16} />
         </Box>
         <Endpoint
@@ -120,7 +124,16 @@ export function JobCard({ view }: { view: JobView }) {
             color: state.tone === 'muted' ? ds(theme).inkMuted : ds(theme).onAccent,
           })}
         >
-          <Box component="span" sx={{ display: 'flex', flexShrink: 0 }}>
+          <Box
+            component="span"
+            sx={{
+              display: 'flex',
+              flexShrink: 0,
+              borderRadius: '50%',
+              animation:
+                state.tone === 'mint' ? `${pulseRing} 2.4s ${ease.standard} infinite` : 'none',
+            }}
+          >
             {state.icon}
           </Box>
           <Box

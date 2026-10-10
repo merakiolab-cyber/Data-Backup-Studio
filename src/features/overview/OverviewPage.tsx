@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { CalendarClock, FolderSync, HardDrive, Plus } from 'lucide-react';
 import { Link } from 'react-router';
+import { stagger } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { Page } from '@/components/Page';
 import { Section } from '@/components/Section';
@@ -35,6 +36,7 @@ export function OverviewPage() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: 2,
           mb: 5,
+          ...stagger(70),
         }}
       >
         <StatTile
@@ -77,6 +79,7 @@ export function OverviewPage() {
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
               gap: 2,
+              ...stagger(),
             }}
           >
             {jobViews.map((view) => (

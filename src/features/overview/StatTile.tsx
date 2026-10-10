@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
+import { duration, ease, hoverLift } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { DesignTokens } from '@/app/theme/tokens';
 import { IconBubble } from '@/components/IconBubble';
@@ -34,12 +35,17 @@ export function StatTile({ accent, icon, value, label, striped = false }: StatTi
           backgroundImage: striped
             ? 'repeating-linear-gradient(90deg, rgba(18,20,23,0.07) 0 2px, transparent 2px 9px)'
             : 'none',
+          ...hoverLift(t.shadowRaised),
+          '& .tile-icon': { transition: `transform ${duration.hover * 2}ms ${ease.spring}` },
+          '&:hover .tile-icon': { transform: 'rotate(-10deg) scale(1.08)' },
         };
       }}
     >
-      <IconBubble tone="glass">{icon}</IconBubble>
+      <Box className="tile-icon" sx={{ alignSelf: 'flex-start' }}>
+        <IconBubble tone="glass">{icon}</IconBubble>
+      </Box>
       <Box>
-        <SplitValue value={value} size={48} />
+        <SplitValue value={value} size={48} animate />
         <Typography variant="body2" sx={{ mt: 1, opacity: 0.75 }}>
           {label}
         </Typography>

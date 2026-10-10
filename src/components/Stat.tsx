@@ -12,7 +12,7 @@ interface StatProps {
 export function Stat({ value, label, size = 40 }: StatProps) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
-      <SplitValue value={String(value)} size={size} />
+      <SplitValue value={String(value)} size={size} animate />
       <Typography variant="body1" color="text.secondary">
         {label}
       </Typography>

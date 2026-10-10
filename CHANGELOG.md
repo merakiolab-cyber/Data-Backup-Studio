@@ -18,6 +18,14 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Konfigurace schéma v2 (`jobs`, `sources`) s načtením v1. Závislost `globset` pro kontrolu vzorů.
 - ADR 0005. Testy: 47 v jádře (+22), frontend 9 (formulář úlohy, karty na Přehledu).
 
+### Přidáno – mikroanimace
+- Nástup stránek a postupný nástup karet a seznamů, zvednutí karet při hoveru, stisk tlačítek,
+  dopočítávání velkých čísel, plnění pruhu kapacity, pulz u stavu „Připojeno“ / „Připraveno“,
+  točící se obnovení disků, naskočení dialogů, chipů a ikony zvoleného režimu, živější sidebar.
+- Tokeny pohybu `src/app/theme/motion.ts` (délky, křivky, `enter`, `stagger`, `hoverLift`), stín
+  `shadowRaised`, hook `useCountUp` (s testy). Čistě CSS, bez nové závislosti; `prefers-reduced-motion`
+  vše vypne.
+
 ### Změněno
 - Jemnější stíny karet.
 - **Nový vzhled** (ADR 0004): pastelový „soft“ styl místo čistého Material 3 – přechod mint → levandule,

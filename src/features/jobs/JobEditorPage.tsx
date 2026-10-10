@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { ArrowLeft, Folder, FolderOpen, FolderSearch, HardDrive, Save } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { stagger } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { IconBubble } from '@/components/IconBubble';
 import { Page } from '@/components/Page';
@@ -130,7 +131,7 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
       component="form"
       noValidate
       onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 820 }}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 820, ...stagger(60) }}
     >
       <FormBlock step={1} title="Co zálohovat" description="Složka, kterou chceš mít zálohovanou.">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>

@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import { CircleAlert, CircleCheck, Unplug } from 'lucide-react';
+import { ease, pulseRing } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { VolumeStatus } from '@/lib/bindings';
 import { driveLabel } from '@/lib/format';
@@ -39,7 +40,17 @@ export function VolumeStatusChip({ status, mountPoint }: VolumeStatusChipProps) 
         bgcolor: onAccent ? 'rgba(255, 255, 255, 0.55)' : ds(theme).muted,
       })}
     >
-      {icon}
+      <Box
+        component="span"
+        sx={{
+          display: 'flex',
+          borderRadius: '50%',
+          animation:
+            status.state === 'connected' ? `${pulseRing} 2.4s ${ease.standard} infinite` : 'none',
+        }}
+      >
+        {icon}
+      </Box>
       {label}
     </Box>
   );

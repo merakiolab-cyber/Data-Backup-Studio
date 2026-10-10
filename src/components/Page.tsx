@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
+import { enter } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 
 interface PageProps {
@@ -14,7 +15,7 @@ interface PageProps {
 export function Page({ title, description, actions, children }: PageProps) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 4, pt: 4, pb: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, px: 4, pt: 4, pb: 3, ...enter() }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="h1">{title}</Typography>
           {description && (
@@ -38,7 +39,7 @@ export function Page({ title, description, actions, children }: PageProps) {
           backdropFilter: 'blur(24px)',
         })}
       >
-        <Box sx={{ maxWidth: 1120, mx: 'auto', p: 4 }}>{children}</Box>
+        <Box sx={{ maxWidth: 1120, mx: 'auto', p: 4, ...enter(60) }}>{children}</Box>
       </Box>
     </Box>
   );
