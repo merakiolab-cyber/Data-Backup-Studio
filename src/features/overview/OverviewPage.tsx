@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { CalendarClock, FolderSync, HardDrive, Plus } from 'lucide-react';
 import { Link } from 'react-router';
-import { stagger } from '@/app/theme/motion';
+import { enter, stagger } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { Page } from '@/components/Page';
 import { Section } from '@/components/Section';
@@ -10,7 +10,9 @@ import { Stat } from '@/components/Stat';
 import { useJobs } from '@/features/jobs/api';
 import { JobCard } from '@/features/jobs/components/JobCard';
 import { useVolumes } from '@/features/volumes/api';
+import { StatsCard } from './StatsCard';
 import { StatTile } from './StatTile';
+import { overviewStats } from './stats';
 
 export function OverviewPage() {
   const volumes = useVolumes();
@@ -59,6 +61,12 @@ export function OverviewPage() {
           striped
         />
       </Box>
+
+      {(registered.length > 0 || jobViews.length > 0) && (
+        <Box sx={{ mb: 5, ...enter(140) }}>
+          <StatsCard stats={overviewStats(registered, jobViews)} />
+        </Box>
+      )}
 
       <Section
         title="Úlohy"

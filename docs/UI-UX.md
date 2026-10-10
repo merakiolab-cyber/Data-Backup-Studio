@@ -20,7 +20,7 @@ s vlastními tokeny (rozhodnutí: [ADR 0004](decisions/0004-visual-style.md)). J
 ## Obrazovky
 | Obrazovka | Obsah |
 |---|---|
-| Přehled | Pastelové dlaždice (připojené disky, úlohy, poslední záloha), karty úloh, „Nová úloha“, „Spustit vše“ |
+| Přehled | Pastelové dlaždice (připojené disky, úlohy, poslední záloha), karta Statistiky (kapacita a volno cílů, úlohy podle režimu, vzory vyloučení, zaplnění každého cílového disku), karty úloh, „Nová úloha“, „Spustit vše“ |
 | Editor úlohy | Název, zdroj (výběr složky), cíl (registrovaný disk + složka), režim (přepínač), vyloučení (chips) |
 | Náhled plánu | Souhrn: kopírovat / aktualizovat / smazat (počty, objem), rozbalitelný seznam, „Spustit“ |
 | Běh | Lineární průběh, rychlost, ETA, aktuální soubor, „Zrušit“ |
