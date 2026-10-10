@@ -1,0 +1,15 @@
+[package]
+name = "backup-core"
+description = "Backup engine, volume identity and storage for Data Backup Studio"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+specta.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

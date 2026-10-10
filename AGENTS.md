@@ -15,9 +15,10 @@ Vite · MUI (Material 3 téma) · TanStack Query + Zustand · tauri-specta · Bi
 ## Příkazy
 | Účel | Příkaz |
 |---|---|
-| Vývoj | `pnpm tauri dev` |
+| Vývoj | `pnpm tauri dev` (Vite na portu 1427) |
 | Kontroly (lint, typy, clippy, fmt) | `pnpm check` |
-| Testy | `pnpm test` (Vitest) · `cargo test --workspace` |
+| Automatické opravy formátu | `pnpm format` |
+| Testy | `pnpm test` (Vitest) · `cargo test --workspace` (zároveň přegeneruje `src/lib/bindings.ts`) |
 | Release build | viz skill `.cursor/skills/release-offline` |
 
 ## Po dokončení každé změny

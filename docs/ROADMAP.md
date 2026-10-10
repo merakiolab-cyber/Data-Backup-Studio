@@ -9,12 +9,13 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Git, `.gitignore`, `.editorconfig`, `.gitattributes`
 
 ## Fáze 1 – Kostra aplikace
-- [ ] Scaffold Tauri 2 + React + TS + Vite (pnpm)
-- [ ] Cargo workspace: `crates/backup-core` + `src-tauri`
-- [ ] Biome, clippy, rustfmt, skripty `pnpm check` / `pnpm test`
-- [ ] MUI téma (M3 barvy, světlý/tmavý), navigační rail, prázdné obrazovky
-- [ ] `tauri-specta` – generované TS bindings
-- [ ] Minimální capabilities + CSP
+- [x] Scaffold Tauri 2 + React + TS + Vite (pnpm)
+- [x] Cargo workspace: `crates/backup-core` + `src-tauri`
+- [x] Biome, clippy, rustfmt, skripty `pnpm check` / `pnpm test`
+- [x] MUI téma (M3 barvy, světlý/tmavý), navigační rail, prázdné obrazovky
+- [x] `tauri-specta` – generované TS bindings
+- [x] Minimální capabilities + CSP
+- [x] Windows manifest (Common Controls v6, long paths, DPI) pro aplikaci i testy
 
 ## Fáze 2 – Disky (identita svazků)
 - [ ] Enumerace svazků (písmeno, jmenovka, sériové č., GUID, velikost, volné místo, typ)
@@ -48,6 +49,15 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [ ] Volitelné ověření kopií (blake3)
 - [ ] NSIS instalátor s offline WebView2 + portable exe
 - [ ] v1.0.0
+
+## Fáze 7 – Zveřejnění na GitHubu (portfolio)
+Až bude aplikace hotová a odladěná.
+- [ ] Audit historie gitu na osobní data (`git log -p`, hledání cest, jmen disků, sériových čísel)
+- [ ] Rozhodnout e-mail autora commitů (veřejný vs. GitHub `noreply`), případně přepsat historii
+- [ ] Ověřit, že konfigurace a historie běhů jsou jen v `%APPDATA%`, nikdy v repu
+- [ ] LICENSE (předběžně MIT), README v angličtině + screenshoty s fiktivními daty
+- [ ] GitHub Actions: `pnpm check`, testy, build instalátoru
+- [ ] Release na GitHubu s instalátorem a SHA256
 
 ## Nápady na později
 - Automatické spuštění po připojení disku

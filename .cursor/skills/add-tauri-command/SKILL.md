@@ -20,9 +20,12 @@ Postup:
 2. **Test**: unit test nebo integrační test v `crates/backup-core/tests/` (FS jen v `TempDir`).
 3. **Příkaz**: tenký wrapper, blokující I/O přes `spawn_blocking`, chyba → `AppError`.
    Validuj vstupy (viz rule `tauri-security`).
-4. **Registrace**: přidej do `collect_commands![…]` v `src-tauri/src/lib.rs`. Bindings se
-   generují při `pnpm tauri dev` do `src/lib/bindings.ts` – soubor needituj ručně.
+4. **Registrace**: přidej do `collect_commands![…]` v `specta_builder()` v `src-tauri/src/lib.rs`.
+   Spusť `cargo test -p data-backup-studio` – test `export_typescript_bindings` přegeneruje
+   `src/lib/bindings.ts` (soubor needituj ručně, commituj ho).
 5. **Hook**: `useQuery` pro čtení, `useMutation` + `invalidateQueries` pro zápis.
+   Výsledek příkazu převeď přes `unwrap()` z `src/lib/result.ts`:
+   `queryFn: async () => unwrap(await commands.listVolumes())`.
 6. **Události** (průběh): typ události derivuje `specta::Type` + `tauri_specta::Event`,
    emituj max ~10×/s, na frontendu odběr s úklidem.
 

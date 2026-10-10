@@ -13,11 +13,12 @@ alwaysApply: false
 - Data z backendu přes TanStack Query (`useQuery`/`useMutation`), lokální UI stav přes Zustand.
 - Události průběhu (`run-progress`) odebírat v hooku s úklidem v `useEffect` cleanup.
 - Žádné přímé `@tauri-apps/plugin-fs` – souborové operace dělá výhradně Rust.
+- Barvy M3 v `sx` callbacku přes `(theme.vars ?? theme).palette.m3.<role>` (správně pro světlý i tmavý režim).
 
 ```tsx
 // ✅
 export function useJobs() {
-  return useQuery({ queryKey: ['jobs'], queryFn: () => commands.listJobs() });
+  return useQuery({ queryKey: ['jobs'], queryFn: async () => unwrap(await commands.listJobs()) });
 }
 // ❌ invoke('list_jobs') – netypované, obchází bindings
 ```

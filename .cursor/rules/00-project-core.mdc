@@ -26,3 +26,9 @@ Scope: `engine`, `volumes`, `jobs`, `storage`, `ui`, `tauri`, `build`, `docs`.
 - Žádná síť, CDN, telemetrie, vzdálené fonty. Vše přibalené.
 - Nikdy nesmazat data v cíli, pokud je zdroj prázdný nebo nedostupný.
 - Nepřidávej závislost bez zdůvodnění; preferuj existující stack.
+
+## Repo bude veřejné (GitHub portfolio)
+- Do repa nikdy nedávej osobní data: skutečné cesty uživatele, názvy/sériová čísla jeho disků,
+  exporty konfigurace, logy, `history.db`, screenshoty s reálnými složkami.
+- Testy a příklady jen s fiktivními daty (`D:\Fotky`, „WD Elements 2 TB“, serial `0x1234ABCD`).
+- Uživatelská data patří jen do `%APPDATA%\DataBackupStudio\` (mimo repo).
