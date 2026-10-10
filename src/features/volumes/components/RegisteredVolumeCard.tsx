@@ -1,17 +1,14 @@
-import DeleteOutlineRounded from '@mui/icons-material/DeleteOutlineRounded';
-import EditRounded from '@mui/icons-material/EditRounded';
-import MoreVertRounded from '@mui/icons-material/MoreVertRounded';
-import UsbRounded from '@mui/icons-material/UsbRounded';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
 import IconButton from '@mui/material/IconButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import { Ellipsis, HardDrive, Pencil, ShieldCheck, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ds } from '@/app/theme/theme';
+import { IconBubble } from '@/components/IconBubble';
 import type { RegisteredVolumeView } from '@/lib/bindings';
 import { formatBytes } from '@/lib/format';
 import { useConfirmVolume, useRenameVolume, useUnregisterVolume } from '../api';
@@ -30,6 +27,7 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
   const rename = useRenameVolume();
   const remove = useUnregisterVolume();
   const confirm = useConfirmVolume();
+  const onAccent = status.state !== 'disconnected';
 
   const openDialog = (next: OpenDialog) => {
     setMenuAnchor(null);
@@ -39,80 +37,108 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
   };
 
   return (
-    <Card sx={{ p: 2.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box
-          aria-hidden
-          sx={(theme) => ({
-            width: 48,
-            height: 48,
-            flexShrink: 0,
-            borderRadius: 3,
-            display: 'grid',
-            placeItems: 'center',
-            bgcolor: (theme.vars ?? theme).palette.m3.primaryContainer,
-            color: (theme.vars ?? theme).palette.m3.onPrimaryContainer,
-          })}
-        >
-          <UsbRounded />
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="subtitle1" noWrap>
-            {volume.name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {describeVolume(
-              live ?? { model: volume.model, bus: 'unknown', fileSystem: volume.fileSystem },
-            )}
-            {!live && ` · ${formatBytes(volume.totalBytes)}`}
-          </Typography>
-        </Box>
+    <Box
+      component="article"
+      aria-label={volume.name}
+      sx={(theme) => {
+        const t = ds(theme);
+        const background =
+          status.state === 'connected'
+            ? t.mint
+            : status.state === 'needsConfirmation'
+              ? t.lemon
+              : t.surface;
+        return {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2.5,
+          minHeight: 236,
+          p: 2.5,
+          borderRadius: '28px',
+          bgcolor: background,
+          color: onAccent ? t.onAccent : t.ink,
+          boxShadow: onAccent ? 'none' : t.shadow,
+        };
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <IconBubble tone={onAccent ? 'glass' : 'muted'}>
+          <HardDrive size={22} />
+        </IconBubble>
+        <Box sx={{ flex: 1 }} />
         <VolumeStatusChip status={status} mountPoint={live?.mountPoint} />
         <IconButton
           aria-label={`Možnosti disku ${volume.name}`}
           onClick={(event) => setMenuAnchor(event.currentTarget)}
+          sx={
+            onAccent
+              ? {
+                  bgcolor: 'rgba(255, 255, 255, 0.55)',
+                  borderColor: 'rgba(255, 255, 255, 0.7)',
+                  color: 'inherit',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.8)' },
+                }
+              : undefined
+          }
         >
-          <MoreVertRounded />
+          <Ellipsis size={20} />
         </IconButton>
       </Box>
 
-      {live && status.state === 'connected' && (
-        <Box sx={{ mt: 2, pl: 8 }}>
-          <CapacityBar totalBytes={live.totalBytes} freeBytes={live.freeBytes} />
-        </Box>
-      )}
+      <Box>
+        <Typography variant="h3" component="h3" noWrap>
+          {volume.name}
+        </Typography>
+        <Typography variant="body2" noWrap sx={{ opacity: 0.7 }}>
+          {describeVolume(
+            live ?? { model: volume.model, bus: 'unknown', fileSystem: volume.fileSystem },
+          )}
+        </Typography>
+      </Box>
 
-      {status.state === 'needsConfirmation' && (
-        <Alert
-          severity="warning"
-          sx={{ mt: 2 }}
-          action={
-            status.reason !== 'duplicate' && (
+      <Box sx={{ mt: 'auto' }}>
+        {status.state === 'connected' && live && (
+          <CapacityBar totalBytes={live.totalBytes} freeBytes={live.freeBytes} />
+        )}
+        {status.state === 'disconnected' && (
+          <Typography variant="body2" color="text.secondary">
+            Kapacita {formatBytes(volume.totalBytes)}. Připoj disk a ukáže se jeho aktuální písmeno.
+          </Typography>
+        )}
+        {status.state === 'needsConfirmation' && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+            <Typography variant="body2" sx={{ opacity: 0.85 }}>
+              {confirm.error?.message ?? confirmReasonText[status.reason]}
+            </Typography>
+            {status.reason !== 'duplicate' && (
               <Button
-                color="inherit"
-                size="small"
+                variant="contained"
+                startIcon={<ShieldCheck size={18} />}
                 loading={confirm.isPending}
                 onClick={() => confirm.mutate(volume.id)}
+                sx={(theme) => ({
+                  flexShrink: 0,
+                  bgcolor: ds(theme).accentButton,
+                  color: ds(theme).onAccentButton,
+                })}
               >
                 Potvrdit disk
               </Button>
-            )
-          }
-        >
-          {confirm.error?.message ?? confirmReasonText[status.reason]}
-        </Alert>
-      )}
+            )}
+          </Box>
+        )}
+      </Box>
 
       <Menu anchorEl={menuAnchor} open={menuAnchor !== null} onClose={() => setMenuAnchor(null)}>
         <MenuItem onClick={() => openDialog('rename')}>
           <ListItemIcon>
-            <EditRounded fontSize="small" />
+            <Pencil size={18} />
           </ListItemIcon>
           Přejmenovat
         </MenuItem>
         <MenuItem onClick={() => openDialog('remove')}>
           <ListItemIcon>
-            <DeleteOutlineRounded fontSize="small" />
+            <Trash2 size={18} />
           </ListItemIcon>
           Odebrat z aplikace
         </MenuItem>
@@ -139,6 +165,6 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
         onConfirm={() => remove.mutate(volume.id, { onSuccess: () => setDialog(null) })}
         onClose={() => setDialog(null)}
       />
-    </Card>
+    </Box>
   );
 }

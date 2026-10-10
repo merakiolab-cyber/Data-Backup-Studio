@@ -5,7 +5,14 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Změněno
+- **Nový vzhled** (ADR 0004): pastelový „soft“ styl místo čistého Material 3 – přechod mint → levandule,
+  velký bílý list s kartami, sidebar s kulatými ikonovými odkazy a badge, pastelové karty disků podle stavu,
+  velká čísla smíšenou vahou, černé pill CTA. Písmo Urbanist, ikony lucide-react; tokeny `ds(theme)`.
+  Odebrány `@mui/icons-material` a Roboto. Pravidlo `ui-material-design` → `ui-design-system`.
+
 ### Přidáno
+- DEV-only demo režim `src/dev/demoIpc.ts`: `pnpm dev` v běžném prohlížeči ukáže smyšlené disky.
 - **Disky (fáze 2)**: aplikace načte připojené disky z Windows včetně sběrnice (USB/SATA/NVMe),
   modelu, sériového čísla a volného místa. Disk jde zaregistrovat jako cílový – do jeho kořene
   se zapíše skrytá značka `.databackupstudio\volume.json` a disk je pak rozpoznán pod jakýmkoli písmenem.
@@ -33,8 +40,9 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 ### Poznámky
 - Vite dev server běží na portu **1427** (1420 obsazuje jiný projekt).
 - Aplikace spuštěná AI agentem běží v izolovaném prostředí a okno není vidět – vizuální kontrolu
-  dělá uživatel přes `pnpm tauri dev`.
+  dělá uživatel přes `pnpm tauri dev`, nebo agent headless snímky demo režimu (`pnpm dev` na jiném portu).
+- Ruční test fáze 2 se skutečnými USB disky uživatel potvrdil (registrace funguje).
 
 ### Další krok
-- Ruční test fáze 2 se skutečnými USB disky (registrace, přepojení → jiné písmeno, stav se nezmění).
+- Zpětná vazba uživatele k novému vzhledu.
 - Fáze 3 – úlohy: doména `Job`/`Location`, uložení do `config.json`, editor úlohy a přehled.

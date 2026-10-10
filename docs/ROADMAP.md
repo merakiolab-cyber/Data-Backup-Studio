@@ -22,7 +22,7 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Registrace cílového disku (značkový soubor `.databackupstudio/volume.json`)
 - [x] Resolver `VolumeRef → aktuální písmeno` + varování při nesouladu a potvrzení disku
 - [x] Obrazovka „Disky“ s živým stavem připojení, přejmenování, odebrání
-- [ ] Ruční test se skutečnými USB disky (registrace, přepojení do jiného portu → jiné písmeno)
+- [x] Ruční test se skutečnými USB disky (registrace, přepojení do jiného portu → jiné písmeno)
 - [ ] Později: místo pollingu reagovat na `WM_DEVICECHANGE` (nebudit spící USB disky)
 
 ## Fáze 3 – Úlohy (pravidla)

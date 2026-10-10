@@ -1,8 +1,6 @@
-import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded';
-import ErrorOutlineRounded from '@mui/icons-material/ErrorOutlineRounded';
-import UsbOffRounded from '@mui/icons-material/UsbOffRounded';
-import Chip from '@mui/material/Chip';
-import type { Theme } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import { CircleAlert, CircleCheck, Unplug } from 'lucide-react';
+import { ds } from '@/app/theme/theme';
 import type { VolumeStatus } from '@/lib/bindings';
 import { driveLabel } from '@/lib/format';
 
@@ -11,30 +9,38 @@ interface VolumeStatusChipProps {
   mountPoint: string | undefined;
 }
 
+/** Status pill: always icon + text, never color alone. */
 export function VolumeStatusChip({ status, mountPoint }: VolumeStatusChipProps) {
-  if (status.state === 'connected') {
-    return (
-      <Chip
-        icon={<CheckCircleRounded />}
-        label={mountPoint ? `Připojený jako ${driveLabel(mountPoint)}` : 'Připojený'}
-        sx={(theme: Theme) => {
-          const m3 = (theme.vars ?? theme).palette.m3;
-          return { bgcolor: m3.successContainer, '& .MuiChip-icon': { color: m3.success } };
-        }}
-      />
-    );
-  }
-  if (status.state === 'needsConfirmation') {
-    return (
-      <Chip
-        icon={<ErrorOutlineRounded />}
-        label="Potřebuje ověřit"
-        sx={(theme: Theme) => {
-          const m3 = (theme.vars ?? theme).palette.m3;
-          return { bgcolor: m3.warningContainer, '& .MuiChip-icon': { color: m3.warning } };
-        }}
-      />
-    );
-  }
-  return <Chip icon={<UsbOffRounded />} label="Nepřipojený" variant="outlined" />;
+  const { icon, label } =
+    status.state === 'connected'
+      ? {
+          icon: <CircleCheck size={16} />,
+          label: mountPoint ? `Připojený jako ${driveLabel(mountPoint)}` : 'Připojený',
+        }
+      : status.state === 'needsConfirmation'
+        ? { icon: <CircleAlert size={16} />, label: 'Potřebuje ověřit' }
+        : { icon: <Unplug size={16} />, label: 'Nepřipojený' };
+  const onAccent = status.state !== 'disconnected';
+
+  return (
+    <Box
+      sx={(theme) => ({
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 0.75,
+        height: 34,
+        px: 1.5,
+        borderRadius: '999px',
+        fontSize: '0.8125rem',
+        fontWeight: 600,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        color: onAccent ? ds(theme).onAccent : ds(theme).inkMuted,
+        bgcolor: onAccent ? 'rgba(255, 255, 255, 0.55)' : ds(theme).muted,
+      })}
+    >
+      {icon}
+      {label}
+    </Box>
+  );
 }

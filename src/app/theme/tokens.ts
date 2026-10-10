@@ -1,90 +1,89 @@
 /**
- * Material 3 color roles generated from the seed color #3D5AFE (indigo).
- * MUI palette keys are mapped from these roles in `theme.ts`.
+ * Design tokens of the "soft pastel" visual style (see docs/UI-UX.md).
+ * Pastel accents keep dark ink text in both color schemes.
  */
-export interface M3Scheme {
-  primary: string;
-  onPrimary: string;
-  primaryContainer: string;
-  onPrimaryContainer: string;
-  secondary: string;
-  onSecondary: string;
-  secondaryContainer: string;
-  onSecondaryContainer: string;
-  error: string;
-  onError: string;
-  errorContainer: string;
-  onErrorContainer: string;
-  success: string;
-  successContainer: string;
-  warning: string;
-  warningContainer: string;
+export interface DesignTokens {
+  /** Full-window mesh gradient behind everything. */
+  backdrop: string;
+  /** Translucent content sheet placed on the backdrop. */
+  sheet: string;
+  sheetBorder: string;
+  /** Cards and list rows inside the sheet. */
   surface: string;
-  onSurface: string;
-  onSurfaceVariant: string;
+  /** Pill groups, secondary buttons, inputs. */
+  muted: string;
+  mutedHover: string;
   outline: string;
-  outlineVariant: string;
-  surfaceContainerLowest: string;
-  surfaceContainerLow: string;
-  surfaceContainer: string;
-  surfaceContainerHigh: string;
-  surfaceContainerHighest: string;
+  ink: string;
+  inkMuted: string;
+  inkFaint: string;
+  /** Text and icons drawn on pastel accents. */
+  onAccent: string;
+  /** Primary button placed on a pastel accent (dark in both schemes). */
+  accentButton: string;
+  onAccentButton: string;
+  mint: string;
+  lemon: string;
+  lilac: string;
+  peach: string;
+  sky: string;
+  badge: string;
+  shadow: string;
 }
 
-export const lightScheme: M3Scheme = {
-  primary: '#3D52C4',
-  onPrimary: '#FFFFFF',
-  primaryContainer: '#DEE0FF',
-  onPrimaryContainer: '#00105C',
-  secondary: '#5B5D72',
-  onSecondary: '#FFFFFF',
-  secondaryContainer: '#E0E1F9',
-  onSecondaryContainer: '#181A2C',
-  error: '#BA1A1A',
-  onError: '#FFFFFF',
-  errorContainer: '#FFDAD6',
-  onErrorContainer: '#410002',
-  success: '#2E6C33',
-  successContainer: '#B1F2AE',
-  warning: '#7D5700',
-  warningContainer: '#FFDEA6',
-  surface: '#FBF8FF',
-  onSurface: '#1B1B21',
-  onSurfaceVariant: '#46464F',
-  outline: '#767680',
-  outlineVariant: '#C7C5D0',
-  surfaceContainerLowest: '#FFFFFF',
-  surfaceContainerLow: '#F5F2FA',
-  surfaceContainer: '#EFEDF4',
-  surfaceContainerHigh: '#E9E7EF',
-  surfaceContainerHighest: '#E4E1E9',
+export const lightTokens: DesignTokens = {
+  backdrop: [
+    'radial-gradient(60% 70% at 0% 0%, #B4F0DC 0%, transparent 70%)',
+    'radial-gradient(55% 60% at 100% 0%, #E2DBF8 0%, transparent 70%)',
+    'radial-gradient(60% 60% at 100% 100%, #D9EAFB 0%, transparent 70%)',
+    'radial-gradient(50% 60% at 0% 100%, #E3F6EE 0%, transparent 70%)',
+    '#EEF2F3',
+  ].join(', '),
+  sheet: 'rgba(255, 255, 255, 0.58)',
+  sheetBorder: 'rgba(255, 255, 255, 0.8)',
+  surface: '#FFFFFF',
+  muted: '#EEF0F3',
+  mutedHover: '#E4E7EB',
+  outline: '#E2E5EA',
+  ink: '#121417',
+  inkMuted: '#7D848D',
+  inkFaint: '#B4BAC1',
+  onAccent: '#121417',
+  accentButton: '#121417',
+  onAccentButton: '#FFFFFF',
+  mint: '#8FF2AA',
+  lemon: '#F1F47F',
+  lilac: '#D4BDF4',
+  peach: '#F6A88E',
+  sky: '#AEE3F4',
+  badge: '#F2877C',
+  shadow: '0 8px 24px rgba(18, 20, 23, 0.06)',
 };
 
-export const darkScheme: M3Scheme = {
-  primary: '#BAC3FF',
-  onPrimary: '#08218F',
-  primaryContainer: '#2538AA',
-  onPrimaryContainer: '#DEE0FF',
-  secondary: '#C3C5DD',
-  onSecondary: '#2D2F42',
-  secondaryContainer: '#43465A',
-  onSecondaryContainer: '#E0E1F9',
-  error: '#FFB4AB',
-  onError: '#690005',
-  errorContainer: '#93000A',
-  onErrorContainer: '#FFDAD6',
-  success: '#96D594',
-  successContainer: '#13521D',
-  warning: '#F8BD48',
-  warningContainer: '#5F4100',
-  surface: '#121318',
-  onSurface: '#E4E1E9',
-  onSurfaceVariant: '#C7C5D0',
-  outline: '#90909A',
-  outlineVariant: '#46464F',
-  surfaceContainerLowest: '#0D0E13',
-  surfaceContainerLow: '#1B1B21',
-  surfaceContainer: '#1F1F25',
-  surfaceContainerHigh: '#2A2930',
-  surfaceContainerHighest: '#34343B',
+export const darkTokens: DesignTokens = {
+  backdrop: [
+    'radial-gradient(60% 70% at 0% 0%, #12403A 0%, transparent 70%)',
+    'radial-gradient(55% 60% at 100% 0%, #2D2547 0%, transparent 70%)',
+    'radial-gradient(60% 60% at 100% 100%, #16283D 0%, transparent 70%)',
+    '#0D1013',
+  ].join(', '),
+  sheet: 'rgba(22, 26, 30, 0.62)',
+  sheetBorder: 'rgba(255, 255, 255, 0.06)',
+  surface: '#1C2126',
+  muted: '#262C32',
+  mutedHover: '#2F363D',
+  outline: '#30373E',
+  ink: '#F2F4F5',
+  inkMuted: '#98A1AB',
+  inkFaint: '#5D6670',
+  onAccent: '#121417',
+  accentButton: '#121417',
+  onAccentButton: '#FFFFFF',
+  mint: '#7FE29A',
+  lemon: '#E3E673',
+  lilac: '#C2AAE6',
+  peach: '#E99A80',
+  sky: '#9BD3E4',
+  badge: '#F2877C',
+  shadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
 };

@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
+import { IconBubble } from './IconBubble';
 
 interface EmptyStateProps {
   icon: ReactNode;
@@ -20,30 +21,18 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         textAlign: 'center',
         gap: 2,
         px: 4,
-        py: 8,
+        py: 6,
       }}
     >
-      <Box
-        aria-hidden
-        sx={(theme) => ({
-          width: 72,
-          height: 72,
-          borderRadius: '50%',
-          display: 'grid',
-          placeItems: 'center',
-          bgcolor: (theme.vars ?? theme).palette.m3.primaryContainer,
-          color: (theme.vars ?? theme).palette.m3.onPrimaryContainer,
-          '& svg': { fontSize: 36 },
-        })}
-      >
+      <IconBubble size={72} tone="muted">
         {icon}
-      </Box>
+      </IconBubble>
       <Box>
-        <Typography variant="h4" component="h2">
+        <Typography variant="h3" component="h2">
           {title}
         </Typography>
         {description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 420 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 440 }}>
             {description}
           </Typography>
         )}

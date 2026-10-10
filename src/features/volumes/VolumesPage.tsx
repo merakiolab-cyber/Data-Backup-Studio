@@ -1,16 +1,16 @@
-import RefreshRounded from '@mui/icons-material/RefreshRounded';
-import StorageRounded from '@mui/icons-material/StorageRounded';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import IconButton from '@mui/material/IconButton';
 import LinearProgress from '@mui/material/LinearProgress';
-import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import type { ReactNode } from 'react';
+import { HardDrive, RefreshCw } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
-import { PageHeader } from '@/components/PageHeader';
+import { Page } from '@/components/Page';
+import { Section } from '@/components/Section';
+import { Stat } from '@/components/Stat';
 import type { LiveVolume } from '@/lib/bindings';
 import { useVolumes } from './api';
 import { AvailableVolumeList } from './components/AvailableVolumeList';
@@ -20,22 +20,21 @@ export function VolumesPage() {
   const volumes = useVolumes();
 
   return (
-    <>
-      <PageHeader
-        title="Disky"
-        description="Registrované disky poznáme vždy, ať dostanou jakékoli písmeno."
-        action={
-          <Tooltip title="Načíst disky znovu">
-            <IconButton
-              aria-label="Načíst disky znovu"
-              onClick={() => volumes.refetch()}
-              disabled={volumes.isFetching}
-            >
-              <RefreshRounded />
-            </IconButton>
-          </Tooltip>
-        }
-      />
+    <Page
+      title="Disky"
+      description="Registrované disky poznáme vždy, ať dostanou jakékoli písmeno."
+      actions={
+        <Tooltip title="Načíst disky znovu">
+          <IconButton
+            aria-label="Načíst disky znovu"
+            onClick={() => volumes.refetch()}
+            disabled={volumes.isFetching}
+          >
+            <RefreshCw size={20} />
+          </IconButton>
+        </Tooltip>
+      }
+    >
       {volumes.isPending && <LinearProgress aria-label="Načítám disky" />}
       {volumes.isError && (
         <Alert
@@ -50,26 +49,35 @@ export function VolumesPage() {
         </Alert>
       )}
       {volumes.data && (
-        <Stack spacing={5}>
-          <Section title="Cílové disky">
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <Section
+            title="Cílové disky"
+            aside={<Stat value={volumes.data.registered.length} label="registrované" />}
+          >
             {volumes.data.registered.length === 0 ? (
               <EmptyState
-                icon={<StorageRounded />}
+                icon={<HardDrive size={32} />}
                 title="Zatím nemáš registrovaný žádný disk"
                 description="Připoj externí USB disk a níže ho zaregistruj. Aplikace si ho zapamatuje podle jeho identity, ne podle písmene."
               />
             ) : (
-              <Stack spacing={1.5}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+                  gap: 2,
+                }}
+              >
                 {volumes.data.registered.map((view) => (
                   <RegisteredVolumeCard key={view.volume.id} view={view} />
                 ))}
-              </Stack>
+              </Box>
             )}
           </Section>
           <AvailableSections volumes={volumes.data.available} />
-        </Stack>
+        </Box>
       )}
-    </>
+    </Page>
   );
 }
 
@@ -80,11 +88,12 @@ function AvailableSections({ volumes }: { volumes: LiveVolume[] }) {
   return (
     <>
       <Section
-        title="Připojené externí disky"
+        title="Externí disky"
         subtitle="Nový USB disk se tu objeví do pár sekund po připojení."
+        aside={<Stat value={external.length} label="připojené" />}
       >
         {external.length === 0 ? (
-          <Card sx={{ px: 2.5, py: 2 }}>
+          <Card sx={{ px: 3, py: 2.5 }}>
             <Typography variant="body2" color="text.secondary">
               Žádný neregistrovaný externí disk není připojený.
             </Typography>
@@ -97,36 +106,11 @@ function AvailableSections({ volumes }: { volumes: LiveVolume[] }) {
         <Section
           title="Interní disky"
           subtitle="Jako cíl zálohy jde použít i interní disk, jen ne systémový."
+          aside={<Stat value={internal.length} label="disků" />}
         >
           <AvailableVolumeList volumes={internal} />
         </Section>
       )}
     </>
-  );
-}
-
-function Section({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: ReactNode;
-}) {
-  return (
-    <section>
-      <Typography variant="h4" component="h2">
-        {title}
-      </Typography>
-      {subtitle && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          {subtitle}
-        </Typography>
-      )}
-      <Stack spacing={1.5} sx={{ mt: 2 }}>
-        {children}
-      </Stack>
-    </section>
   );
 }

@@ -35,7 +35,7 @@ jednotky** – disky se identifikují podle vlastní identity, takže změna `F:
 | UI knihovna | **MUI (Material UI)** s vlastním M3 tématem | Hotové přístupné komponenty v Material Designu |
 | Datová vrstva UI | TanStack Query (volání backendu) + Zustand (stav UI) | Jasné oddělení serverového a lokálního stavu |
 | Routing | React Router | Jednoduché obrazovky |
-| Písma / ikony | `@fontsource/*`, `@mui/icons-material` | Vše přibalené – žádný CDN, funguje offline |
+| Písma / ikony | `@fontsource-variable/urbanist`, `lucide-react` | Vše přibalené – žádný CDN, funguje offline |
 | Lint / formát | `clippy`, `rustfmt`, **Biome** (TS) | Rychlé, jeden nástroj pro TS lint + format |
 | Testy | `cargo test` (+ `tempfile`), Vitest + Testing Library | Engine testován na reálném FS v dočasných složkách |
 | Balíčkovač | pnpm (lockfile) | Reprodukovatelné buildy |

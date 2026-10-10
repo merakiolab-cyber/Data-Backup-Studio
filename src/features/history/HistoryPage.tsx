@@ -1,16 +1,15 @@
-import HistoryRounded from '@mui/icons-material/HistoryRounded';
+import { History } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
-import { PageHeader } from '@/components/PageHeader';
+import { Page } from '@/components/Page';
 
 export function HistoryPage() {
   return (
-    <>
-      <PageHeader title="Historie" description="Proběhlé zálohy, jejich výsledky a chyby." />
+    <Page title="Historie" description="Proběhlé zálohy, jejich výsledky a chyby.">
       <EmptyState
-        icon={<HistoryRounded />}
+        icon={<History size={32} />}
         title="Zatím neproběhla žádná záloha"
         description="Po prvním spuštění úlohy tu uvidíš, co se zkopírovalo, aktualizovalo nebo smazalo."
       />
-    </>
+    </Page>
   );
 }

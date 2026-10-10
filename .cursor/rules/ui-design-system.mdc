@@ -1,0 +1,30 @@
+---
+description: Vizuální styl (pastelový „soft“ design) a zásady pro UI komponenty a obrazovky
+globs: src/**/*.tsx,src/app/theme/**
+alwaysApply: false
+---
+
+# UI – design systém (pastelový soft styl na MUI)
+
+Plná specifikace: `docs/UI-UX.md`, rozhodnutí: `docs/decisions/0004-visual-style.md`.
+
+- Barvy **jen z tokenů** `ds(theme).<token>` (`src/app/theme/tokens.ts`), v `sx` callbacku:
+  `sx={(theme) => ({ bgcolor: ds(theme).mint })}`. Žádné natvrdo psané hex barvy v komponentách.
+- Pastelové bloky: `mint` = OK / připojeno, `lemon` = pozor / čeká na akci, `lilac`, `peach`, `sky` = doplňkové.
+  Text na pastelu je vždy `onAccent`. Hlavní CTA = černé pill tlačítko (`accentButton` / `onAccentButton`).
+- **Zaoblení v `sx` piš v px řetězci** (`borderRadius: '28px'`). Číslo MUI násobí `theme.shape.borderRadius` (16)!
+  Karty 24–28 px, list (sheet) 32 px, tlačítka a chipy pill `'999px'`.
+- Ikony: `lucide-react` (tenká linka, `strokeWidth` 1.6 nastavuje téma globálně). Ikonová tlačítka kulatá,
+  sdružená do pill skupin; ikona v kruhu přes `IconBubble`.
+- Velká čísla přes `SplitValue` (tučná celá část, lehká zbytek: „1,2 TB“, „1/3“).
+- Stavební bloky: `Page` (titulek + list), `Section`, `Stat`, `IconBubble`, `EmptyState`.
+- Stav (OK / varování / chyba / disk nepřipojen) vždy **ikona + text**, nikdy jen barva.
+- Destruktivní akce: dialog s náhledem dopadu a explicitním potvrzením.
+- Prázdné stavy: ikona, jedna věta, jedna akce.
+- Texty česky, tykání, slovesem. Čísla a velikosti formátovat `cs-CZ` (`1,2 GB`, `12 345 souborů`).
+- Přístupnost: `aria-label` u ikonových tlačítek, viditelný fokus, kontrast AA, světlý i tmavý režim.
+- Animace 150–250 ms, respektovat `prefers-reduced-motion`.
+
+## Vizuální kontrola bez Tauri
+`pnpm dev` otevřený v běžném prohlížeči použije `src/dev/demoIpc.ts` (smyšlená data, jen v DEV).
+Do demo dat ani snímků nikdy nedávej skutečné názvy disků, sériová čísla ani cesty uživatele.
