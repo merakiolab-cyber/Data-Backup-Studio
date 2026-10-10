@@ -9,7 +9,7 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - **Zálohovací úlohy**: editor (`#/ulohy/nova`, `#/ulohy/:id`) v pěti krocích – zdroj přes systémový
   dialog, cílový disk + složka (s výběrem existující složky), režim Aktualizace/Zrcadlo, vzory vyloučení
   (s častými návrhy) a název (předvyplní se podle složky).
-- Karty úloh na Přehledu: zdroj → cíl s aktuální cestou (`D:\Fotky` → `G:\Záloha\Fotky`), stav
+- Karty úloh (stránka Úlohy): zdroj → cíl s aktuální cestou (`D:\Fotky` → `G:\Záloha\Fotky`), stav
   „Připraveno“ / „Disk nepřipojený“ / „Disk potřebuje ověřit“, úprava a smazání. „Spustit“ je zatím neaktivní (fáze 4).
 - Jádro: `Location` + normalizace relativních cest, `Job`/`JobSpec` s validací, modul `jobs`
   (`locate`, create/update/delete, `JobView`), zdrojové disky bez značky (`SourceVolume`, GUID → sériové číslo).
@@ -74,6 +74,11 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Aplikace spuštěná AI agentem běží v izolovaném prostředí a okno není vidět – vizuální kontrolu
   dělá uživatel přes `pnpm tauri dev`, nebo agent headless snímky demo režimu (`pnpm dev` na jiném portu).
 - Ruční test fáze 2 se skutečnými USB disky uživatel potvrdil (registrace funguje).
+- **Stav 2026-10-11:** fáze 0–2 hotové, fáze 3 hotová v kódu (chybí jen ruční test).
+  Vzhled: pastelový soft styl, jemné stíny, mikroanimace (`motion.ts`). Přehled = dlaždice + karta
+  Statistiky, úlohy mají vlastní stránku `#/ulohy`. Testy: 47 v jádře, 15 ve frontendu; `pnpm check` čistý.
+  Headless snímky občas zachytí nástupovou animaci (čísla na 0, karta průsvitná) – v okně aplikace
+  je konečný stav v pořádku. Náhledový Vite pro snímky patří na port 1430 a po práci se zastavuje.
 
 ### Další krok
 - Ruční test fáze 3 se skutečnými disky (vytvořit úlohu, přepojit USB, zkontrolovat cestu na kartě).
