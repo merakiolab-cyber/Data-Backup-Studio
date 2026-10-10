@@ -126,6 +126,14 @@ UI průběžně ukazuje, které registrované disky jsou připojené a pod jaký
 - Příkazy dostávají `guid_path`/`id`, nikdy cestu; svazek se vždy dohledá v čerstvé enumeraci.
 - UI obnovuje seznam disků každé 4 s (jen když je okno aktivní).
 
+### Implementace úloh (fáze 3)
+Podrobně v [ADR 0005](decisions/0005-job-locations.md).
+- `domain/location.rs` – `Location`, normalizace relativní cesty, test „leží uvnitř“ (bez ohledu na velikost písmen).
+- `domain/job.rs` – `Job`, `BackupMode`, `JobSpec::validate()` (název, cesty, cíl není kořen, překryv, `globset`).
+- `jobs/locate.rs` – absolutní cesta z dialogu → svazek + relativní cesta (`LocatedFolder`), nic neukládá.
+- `jobs/mod.rs` – vytvoření/úprava/smazání úlohy, zapamatování zdrojových disků (`config.sources`),
+  zákaz překryvu cílových složek, zákaz odebrání disku používaného úlohou, `JobView` pro UI.
+
 ## 5. Záložní engine
 
 Průběh jedné úlohy:
@@ -174,9 +182,10 @@ Průběh jedné úlohy:
 ## 8. Datový model (zjednodušeně)
 
 ```rust
-struct Volume   { id: Uuid, name: String, serial: u32, guid_path: String, kind: Source | Target }
-struct Location { volume_id: Uuid, rel_path: PathBuf }
-struct Job      { id: Uuid, name: String, source: Location, target: Location,
-                  mode: Mirror | Update, excludes: Vec<String>, enabled: bool }
+struct RegisteredVolume { id: VolumeId, name, serial: u32, guid_path, file_system, model, total_bytes, … } // cíl se značkou
+struct SourceVolume     { id: VolumeId, name, serial: u32, guid_path }                                  // zdroj bez značky
+struct Location { volume_id: VolumeId, rel_path: String }   // "Zaloha\\Fotky", nikdy písmeno
+struct Job      { id: JobId, name, source: Location, target: Location,
+                  mode: Mirror | Update, excludes: Vec<String>, created_at_ms, updated_at_ms }
 struct Run      { id, job_id, started, finished, status, copied, updated, deleted, bytes, errors }
 ```

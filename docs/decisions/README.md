@@ -9,6 +9,7 @@ Rozhodnutí se nepřepisují – když se změní, vznikne nové ADR se stavem �
 | [0002](0002-volume-identity.md) | Identifikace disků nezávislá na písmenu jednotky | Přijato |
 | [0003](0003-sync-engine.md) | Vlastní synchronizační engine v Rustu, soubory 1:1 | Přijato |
 | [0004](0004-visual-style.md) | Pastelový „soft“ vizuální styl místo čistého Material 3 | Přijato |
+| [0005](0005-job-locations.md) | Umístění zdroje a cíle úlohy, zdrojové disky bez značky | Přijato |
 
 ## Šablona
 

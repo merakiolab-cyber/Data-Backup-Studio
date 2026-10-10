@@ -42,6 +42,21 @@ pub struct RegisteredVolume {
     pub registered_at_ms: u64,
 }
 
+/// A volume used only as a backup source. Nothing is written to it, so it is recognised by its
+/// GUID path (stable on this PC) and serial number instead of a marker.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SourceVolume {
+    pub id: VolumeId,
+    /// Volume label, model or drive letter seen when the volume was first used.
+    pub name: String,
+    pub serial: u32,
+    pub guid_path: String,
+}
+
+/// Hidden folder in the root of every registered target that holds the identity marker.
+pub const MARKER_DIR: &str = ".databackupstudio";
+
 /// Content of `<root>\.databackupstudio\volume.json` written to every registered target.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
@@ -59,8 +74,8 @@ impl VolumeMarker {
 
 pub const MAX_NAME_CHARS: usize = 64;
 
-/// Trims the name and checks it is 1–64 characters without control characters.
-pub fn validate_volume_name(name: &str) -> CoreResult<String> {
+/// Trims a volume or job name and checks it is 1–64 characters without control characters.
+pub fn validate_name(name: &str) -> CoreResult<String> {
     let name = name.trim();
     if name.is_empty() {
         return Err(CoreError::InvalidName("name is empty"));
@@ -81,20 +96,20 @@ mod tests {
     #[test]
     fn name_is_trimmed() {
         assert_eq!(
-            validate_volume_name("  WD Elements 2 TB ").ok(),
+            validate_name("  WD Elements 2 TB ").ok(),
             Some("WD Elements 2 TB".into())
         );
     }
 
     #[test]
     fn rejects_invalid_names() {
-        assert!(validate_volume_name("   ").is_err());
-        assert!(validate_volume_name(&"x".repeat(MAX_NAME_CHARS + 1)).is_err());
-        assert!(validate_volume_name("bad\nname").is_err());
+        assert!(validate_name("   ").is_err());
+        assert!(validate_name(&"x".repeat(MAX_NAME_CHARS + 1)).is_err());
+        assert!(validate_name("bad\nname").is_err());
     }
 
     #[test]
     fn accepts_diacritics_up_to_limit() {
-        assert!(validate_volume_name(&"č".repeat(MAX_NAME_CHARS)).is_ok());
+        assert!(validate_name(&"č".repeat(MAX_NAME_CHARS)).is_ok());
     }
 }

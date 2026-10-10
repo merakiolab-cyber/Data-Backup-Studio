@@ -1,4 +1,5 @@
 pub mod app;
+pub mod jobs;
 pub mod volumes;
 
 use crate::error::{AppError, AppResult};

@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use crate::domain::PathProblem;
+
 /// Errors produced by the core library.
 #[derive(Debug, thiserror::Error)]
 pub enum CoreError {
@@ -44,6 +46,33 @@ pub enum CoreError {
 
     #[error("Unsupported config schema version {found}")]
     UnsupportedSchema { found: u32 },
+
+    #[error("Invalid path: {0:?}")]
+    InvalidPath(PathProblem),
+
+    #[error("Invalid exclude pattern '{pattern}'")]
+    InvalidExclude { pattern: String },
+
+    #[error("Too many exclude patterns")]
+    TooManyExcludes,
+
+    #[error("Source and target folders overlap")]
+    SourceTargetOverlap,
+
+    #[error("Target folder is already used by job '{name}'")]
+    TargetInUse { name: String },
+
+    #[error("Job not found")]
+    JobNotFound,
+
+    #[error("Volume is used by {jobs} job(s)")]
+    VolumeInUse { jobs: usize },
+
+    #[error("Folder {path} does not exist")]
+    FolderNotFound { path: PathBuf },
+
+    #[error("Folder {path} is not on a local volume")]
+    FolderNotOnVolume { path: PathBuf },
 }
 
 impl CoreError {

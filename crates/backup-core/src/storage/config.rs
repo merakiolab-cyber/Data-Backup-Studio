@@ -3,18 +3,25 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::domain::RegisteredVolume;
+use crate::domain::{Job, RegisteredVolume, SourceVolume};
 use crate::{CoreError, CoreResult};
 
 pub const CONFIG_FILE: &str = "config.json";
-const SCHEMA_VERSION: u32 = 1;
+/// v2 added `jobs` and `sources`. Older builds refuse a newer file instead of dropping the jobs on save.
+const SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub schema_version: u32,
+    /// Registered backup targets.
     #[serde(default)]
     pub volumes: Vec<RegisteredVolume>,
+    /// Volumes remembered because a job reads from them.
+    #[serde(default)]
+    pub sources: Vec<SourceVolume>,
+    #[serde(default)]
+    pub jobs: Vec<Job>,
 }
 
 impl Default for Config {
@@ -22,6 +29,8 @@ impl Default for Config {
         Self {
             schema_version: SCHEMA_VERSION,
             volumes: Vec::new(),
+            sources: Vec::new(),
+            jobs: Vec::new(),
         }
     }
 }
@@ -40,13 +49,16 @@ impl ConfigStore {
         let path = dir.join(CONFIG_FILE);
         let config = match fs::read(&path) {
             Ok(bytes) => {
-                let config: Config =
+                let mut config: Config =
                     serde_json::from_slice(&bytes).map_err(|e| CoreError::json(&path, e))?;
                 if config.schema_version > SCHEMA_VERSION {
                     return Err(CoreError::UnsupportedSchema {
                         found: config.schema_version,
                     });
                 }
+                // Older schemas only lack fields that default to empty; the file is rewritten
+                // with the current version on the next change.
+                config.schema_version = SCHEMA_VERSION;
                 config
             }
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Config::default(),
@@ -128,6 +140,18 @@ mod tests {
         assert!(result.is_err());
         assert!(store.config().volumes.is_empty());
         assert!(!dir.path().join(CONFIG_FILE).exists());
+    }
+
+    #[test]
+    fn migrates_v1_without_jobs() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(
+            dir.path().join(CONFIG_FILE),
+            br#"{"schemaVersion": 1, "volumes": []}"#,
+        )
+        .unwrap();
+        let store = ConfigStore::open(dir.path()).unwrap();
+        assert_eq!(store.config(), &Config::default());
     }
 
     #[test]

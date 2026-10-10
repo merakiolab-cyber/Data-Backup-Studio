@@ -11,6 +11,12 @@ export const commands = {
 	renameVolume: (id: VolumeId, name: string) => typedError<null, AppError>(__TAURI_INVOKE("rename_volume", { id, name })),
 	unregisterVolume: (id: VolumeId) => typedError<null, AppError>(__TAURI_INVOKE("unregister_volume", { id })),
 	confirmVolume: (id: VolumeId) => typedError<null, AppError>(__TAURI_INVOKE("confirm_volume", { id })),
+	listJobs: () => typedError<JobView[], AppError>(__TAURI_INVOKE("list_jobs")),
+	/**  `path` comes from the folder dialog; it is resolved to a volume + relative path and never stored. */
+	locateFolder: (path: string) => typedError<LocatedFolder, AppError>(__TAURI_INVOKE("locate_folder", { path })),
+	createJob: (input: JobInput) => typedError<Job, AppError>(__TAURI_INVOKE("create_job", { input })),
+	updateJob: (id: JobId, input: JobInput) => typedError<Job, AppError>(__TAURI_INVOKE("update_job", { id, input })),
+	deleteJob: (id: JobId) => typedError<null, AppError>(__TAURI_INVOKE("delete_job", { id })),
 };
 
 /* Types */
@@ -21,6 +27,12 @@ export type AppInfo = {
 	version: string,
 	coreVersion: string,
 };
+
+export type BackupMode = 
+/**  Target becomes an exact copy of the source; files missing in the source are deleted. */
+"mirror" | 
+/**  Only new and changed files are copied; nothing in the target is ever deleted. */
+"update";
 
 export type BusKind = "usb" | "sata" | "nvme" | "sd" | "other" | "unknown";
 
@@ -33,6 +45,43 @@ export type ConfirmReason =
 "duplicate";
 
 export type DriveKind = "fixed" | "removable" | "optical" | "ram" | "unknown";
+
+/**  One side of a job as shown in the UI. */
+export type EndpointView = {
+	volumeName: string,
+	status: VolumeStatus,
+	/**  Current full path such as `G:\Zaloha\Fotky`, only while the volume is connected. */
+	path: string | null,
+};
+
+/**  A backup rule: which folder goes where and how. */
+export type Job = {
+	id: JobId,
+	name: string,
+	source: Location,
+	target: Location,
+	mode: BackupMode,
+	/**  Glob patterns relative to the source folder, e.g. `**\/node_modules/**`. */
+	excludes: string[],
+	createdAtMs: number,
+	updatedAtMs: number,
+};
+
+export type JobId = string;
+
+export type JobInput = {
+	name: string,
+	source: SourceRef,
+	target: Location,
+	mode: BackupMode,
+	excludes: string[],
+};
+
+export type JobView = {
+	job: Job,
+	source: EndpointView,
+	target: EndpointView,
+};
 
 /**  A volume currently mounted on this PC. */
 export type LiveVolume = {
@@ -53,6 +102,24 @@ export type LiveVolume = {
 	isSystem: boolean,
 	isExternal: boolean,
 	marker: VolumeMarker | null,
+};
+
+export type LocatedFolder = {
+	/**  How to use the folder as a job source. */
+	source: SourceRef,
+	/**  Registered target volume the folder lies on, if any. */
+	targetId: VolumeId | null,
+	volumeName: string,
+	relPath: string,
+	/**  Current absolute path, for display only – never stored. */
+	path: string,
+};
+
+/**  Folder on a volume, independent of the drive letter it currently has. */
+export type Location = {
+	volumeId: VolumeId,
+	/**  Normalized path relative to the volume root: `Zaloha\Fotky`, empty for the root itself. */
+	relPath: string,
 };
 
 /**
@@ -79,6 +146,13 @@ export type RegisteredVolumeView = {
 	status: VolumeStatus,
 	live: LiveVolume | null,
 };
+
+/**  How the editor refers to the source folder. */
+export type SourceRef = 
+/**  Folder on a volume the app already knows (registered target or remembered source). */
+{ kind: "known"; location: Location } | 
+/**  Folder on a mounted volume seen for the first time; it is remembered when the job is saved. */
+{ kind: "new"; guidPath: string; relPath: string };
 
 /**  Stable identity of a registered volume, independent of its drive letter. */
 export type VolumeId = string;

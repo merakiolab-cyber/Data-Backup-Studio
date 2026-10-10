@@ -1,6 +1,6 @@
 ---
 description: Bezpečnostní invarianty záložního enginu a identifikace disků – ochrana dat uživatele
-globs: crates/backup-core/src/engine/**,crates/backup-core/src/volumes/**,crates/backup-core/tests/**
+globs: crates/backup-core/src/engine/**,crates/backup-core/src/volumes/**,crates/backup-core/src/jobs/**,crates/backup-core/src/domain/**,crates/backup-core/tests/**
 alwaysApply: false
 ---
 
@@ -16,6 +16,9 @@ alwaysApply: false
 8. Režim Aktualizace **nikdy nemaže**.
 9. Porovnání mtime s tolerancí (výchozí 2 s); velikost se porovnává přesně.
 10. Disk se resolvuje přes UUID značky → sériové číslo; nesoulad = varování, ne tichý pokračování.
+11. **Cíl nikdy kořen disku** ani `.databackupstudio`; cílové složky dvou úloh se nesmí překrývat
+    (`JobSpec::validate`, `jobs::prepare`). Tyto kontroly neoslabuj.
+12. Zdrojový disk se nedohledá „nejspíš“ – při nejednoznačném sériovém čísle je nepřipojený.
 
 ## Testy povinné pro každou změnu enginu
 - Zrcadlo s prázdným zdrojem nic nesmaže.

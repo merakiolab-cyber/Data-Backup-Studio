@@ -26,10 +26,12 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [ ] Později: místo pollingu reagovat na `WM_DEVICECHANGE` (nebudit spící USB disky)
 
 ## Fáze 3 – Úlohy (pravidla)
-- [ ] Doména `Job`, `Location`, validace
-- [ ] Úložiště `config.json` (atomický zápis, verze schématu)
-- [ ] Editor úlohy: zdroj, cíl, režim, vyloučení
-- [ ] Přehled úloh (karty se stavem disků a posledním během)
+- [x] Doména `Job`, `Location`, validace (cesty, překryvy, vzory vyloučení)
+- [x] Úložiště `config.json` (atomický zápis, schéma v2 s migrací z v1)
+- [x] Zdrojové disky bez značky (GUID + sériové číslo), výběr složky přes dialog → `locate_folder`
+- [x] Editor úlohy: zdroj, cíl, režim, vyloučení, název
+- [x] Přehled úloh (karty se stavem disků; poslední běh doplní fáze 5)
+- [ ] Ruční test se skutečnými disky (vytvořit úlohu, přepojit USB → cesta na kartě se změní)
 
 ## Fáze 4 – Engine
 - [ ] Scan (jwalk) + filtry (globset)

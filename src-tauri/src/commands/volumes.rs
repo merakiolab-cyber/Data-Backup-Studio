@@ -1,5 +1,6 @@
 use backup_core::CoreError;
 use backup_core::domain::{RegisteredVolume, VolumeId};
+use backup_core::jobs;
 use backup_core::volumes::{self, VolumesOverview, registry};
 use tauri::State;
 
@@ -62,8 +63,7 @@ pub async fn unregister_volume(state: State<'_, AppState>, id: VolumeId) -> AppR
     let state = state.inner().clone();
     blocking(move || {
         let mut store = state.config()?;
-        store.update(|c| registry::unregister(&mut c.volumes, id).map(drop))?;
-        Ok(())
+        Ok(store.update(|c| jobs::unregister_volume(c, id))?)
     })
     .await
 }

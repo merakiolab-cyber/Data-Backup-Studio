@@ -4,10 +4,10 @@ use std::fs;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
+pub use crate::domain::MARKER_DIR;
 use crate::domain::VolumeMarker;
 use crate::{CoreError, CoreResult};
 
-pub const MARKER_DIR: &str = ".databackupstudio";
 const MARKER_FILE: &str = "volume.json";
 
 pub fn marker_path(root: &Path) -> PathBuf {

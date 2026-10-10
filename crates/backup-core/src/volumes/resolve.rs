@@ -3,7 +3,7 @@
 use serde::Serialize;
 
 use super::LiveVolume;
-use crate::domain::RegisteredVolume;
+use crate::domain::{RegisteredVolume, SourceVolume};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
@@ -31,7 +31,7 @@ pub enum Resolution<'a> {
     Disconnected,
 }
 
-impl Resolution<'_> {
+impl<'a> Resolution<'a> {
     pub fn status(&self) -> VolumeStatus {
         match self {
             Self::Connected(_) => VolumeStatus::Connected,
@@ -42,7 +42,7 @@ impl Resolution<'_> {
         }
     }
 
-    pub fn live(&self) -> Option<&LiveVolume> {
+    pub fn live(&self) -> Option<&'a LiveVolume> {
         match self {
             Self::Connected(v) | Self::NeedsConfirmation(v, _) => Some(v),
             Self::Disconnected => None,
@@ -72,6 +72,18 @@ pub fn resolve<'a>(registered: &RegisteredVolume, live: &'a [LiveVolume]) -> Res
         .map_or(Resolution::Disconnected, |v| {
             Resolution::NeedsConfirmation(v, ConfirmReason::MarkerMissing)
         })
+}
+
+/// Finds a source volume: GUID path first, then a serial number that matches exactly one volume.
+pub fn resolve_source<'a>(source: &SourceVolume, live: &'a [LiveVolume]) -> Option<&'a LiveVolume> {
+    if let Some(volume) = live.iter().find(|v| v.guid_path == source.guid_path) {
+        return Some(volume);
+    }
+    let mut by_serial = live.iter().filter(|v| v.serial == source.serial);
+    match (by_serial.next(), by_serial.next()) {
+        (Some(volume), None) => Some(volume),
+        _ => None,
+    }
 }
 
 #[derive(Debug, Clone, Serialize, specta::Type)]
@@ -187,6 +199,27 @@ mod tests {
             resolve(&registered(id, 0x1234_ABCD), &volumes),
             Resolution::NeedsConfirmation(&volumes[0], ConfirmReason::Duplicate)
         );
+    }
+
+    #[test]
+    fn source_found_by_guid_then_unique_serial() {
+        let source = SourceVolume {
+            id: VolumeId::new(),
+            name: "Data".into(),
+            serial: 0x2222_0000,
+            guid_path: live("d", "", 0, None).guid_path,
+        };
+        let by_guid = [live("d", r"E:\", 0x9999_0000, None)];
+        assert_eq!(resolve_source(&source, &by_guid), Some(&by_guid[0]));
+
+        let by_serial = [live("x", r"D:\", 0x2222_0000, None)];
+        assert_eq!(resolve_source(&source, &by_serial), Some(&by_serial[0]));
+
+        let ambiguous = [
+            live("x", r"D:\", 0x2222_0000, None),
+            live("y", r"F:\", 0x2222_0000, None),
+        ];
+        assert_eq!(resolve_source(&source, &ambiguous), None);
     }
 
     #[test]

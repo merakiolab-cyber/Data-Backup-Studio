@@ -12,7 +12,7 @@ use crate::domain::VolumeMarker;
 
 pub use resolve::{
     ConfirmReason, RegisteredVolumeView, Resolution, VolumeStatus, VolumesOverview, overview,
-    resolve,
+    resolve, resolve_source,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, specta::Type)]

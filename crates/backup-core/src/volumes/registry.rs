@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use super::{ConfirmReason, LiveVolume, Resolution, marker, resolve};
-use crate::domain::{RegisteredVolume, VolumeId, VolumeMarker, now_ms, validate_volume_name};
+use crate::domain::{RegisteredVolume, VolumeId, VolumeMarker, now_ms, validate_name};
 use crate::{CoreError, CoreResult};
 
 /// Registers a mounted volume as a backup target and writes its identity marker.
@@ -14,7 +14,7 @@ pub fn register(
     live: &LiveVolume,
     name: &str,
 ) -> CoreResult<RegisteredVolume> {
-    let name = validate_volume_name(name)?;
+    let name = validate_name(name)?;
     if live.is_system {
         return Err(CoreError::SystemVolume);
     }
@@ -60,7 +60,7 @@ pub fn rename(
     name: &str,
     live: &[LiveVolume],
 ) -> CoreResult<()> {
-    let name = validate_volume_name(name)?;
+    let name = validate_name(name)?;
     let volume = find_mut(volumes, id)?;
     volume.name = name;
 

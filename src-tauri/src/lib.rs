@@ -18,6 +18,11 @@ fn specta_builder() -> Builder<tauri::Wry> {
         commands::volumes::rename_volume,
         commands::volumes::unregister_volume,
         commands::volumes::confirm_volume,
+        commands::jobs::list_jobs,
+        commands::jobs::locate_folder,
+        commands::jobs::create_job,
+        commands::jobs::update_job,
+        commands::jobs::delete_job,
     ])
 }
 

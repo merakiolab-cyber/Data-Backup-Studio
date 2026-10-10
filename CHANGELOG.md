@@ -5,7 +5,21 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Přidáno – úlohy (fáze 3)
+- **Zálohovací úlohy**: editor (`#/ulohy/nova`, `#/ulohy/:id`) v pěti krocích – zdroj přes systémový
+  dialog, cílový disk + složka (s výběrem existující složky), režim Aktualizace/Zrcadlo, vzory vyloučení
+  (s častými návrhy) a název (předvyplní se podle složky).
+- Karty úloh na Přehledu: zdroj → cíl s aktuální cestou (`D:\Fotky` → `G:\Záloha\Fotky`), stav
+  „Připraveno“ / „Disk nepřipojený“ / „Disk potřebuje ověřit“, úprava a smazání. „Spustit“ je zatím neaktivní (fáze 4).
+- Jádro: `Location` + normalizace relativních cest, `Job`/`JobSpec` s validací, modul `jobs`
+  (`locate`, create/update/delete, `JobView`), zdrojové disky bez značky (`SourceVolume`, GUID → sériové číslo).
+- Pojistky: cíl nesmí být kořen disku ani `.databackupstudio`, zdroj a cíl se nesmí překrývat,
+  cílové složky dvou úloh se nesmí překrývat, disk používaný úlohou nejde odebrat.
+- Konfigurace schéma v2 (`jobs`, `sources`) s načtením v1. Závislost `globset` pro kontrolu vzorů.
+- ADR 0005. Testy: 47 v jádře (+22), frontend 9 (formulář úlohy, karty na Přehledu).
+
 ### Změněno
+- Jemnější stíny karet.
 - **Nový vzhled** (ADR 0004): pastelový „soft“ styl místo čistého Material 3 – přechod mint → levandule,
   velký bílý list s kartami, sidebar s kulatými ikonovými odkazy a badge, pastelové karty disků podle stavu,
   velká čísla smíšenou vahou, černé pill CTA. Písmo Urbanist, ikony lucide-react; tokeny `ds(theme)`.
@@ -44,5 +58,5 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Ruční test fáze 2 se skutečnými USB disky uživatel potvrdil (registrace funguje).
 
 ### Další krok
-- Zpětná vazba uživatele k novému vzhledu.
-- Fáze 3 – úlohy: doména `Job`/`Location`, uložení do `config.json`, editor úlohy a přehled.
+- Ruční test fáze 3 se skutečnými disky (vytvořit úlohu, přepojit USB, zkontrolovat cestu na kartě).
+- Fáze 4 – engine: scan, plán (dry-run náhled), kopírování s pojistkami Zrcadla, průběh.
