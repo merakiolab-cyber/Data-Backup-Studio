@@ -57,7 +57,7 @@ export const lightTokens: DesignTokens = {
   peach: '#F6A88E',
   sky: '#AEE3F4',
   badge: '#F2877C',
-  shadow: '0 8px 24px rgba(18, 20, 23, 0.06)',
+  shadow: '0 1px 2px rgba(18, 20, 23, 0.04), 0 4px 14px rgba(18, 20, 23, 0.035)',
 };
 
 export const darkTokens: DesignTokens = {
@@ -85,5 +85,5 @@ export const darkTokens: DesignTokens = {
   peach: '#E99A80',
   sky: '#9BD3E4',
   badge: '#F2877C',
-  shadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+  shadow: '0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 14px rgba(0, 0, 0, 0.18)',
 };

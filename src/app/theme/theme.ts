@@ -132,7 +132,7 @@ export const theme = createTheme({
         paper: ({ theme }) => ({
           borderRadius: 20,
           marginTop: 6,
-          boxShadow: '0 12px 32px rgba(18, 20, 23, 0.12)',
+          boxShadow: '0 8px 24px rgba(18, 20, 23, 0.08)',
           border: `1px solid ${ds(theme).outline}`,
         }),
         list: { padding: 6 },
