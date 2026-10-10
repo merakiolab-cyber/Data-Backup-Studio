@@ -1,0 +1,24 @@
+---
+description: Bezpečnostní invarianty záložního enginu a identifikace disků – ochrana dat uživatele
+globs: crates/backup-core/src/engine/**,crates/backup-core/src/volumes/**,crates/backup-core/tests/**
+alwaysApply: false
+---
+
+# Invarianty enginu (porušení = ztráta dat)
+
+1. **Prázdný/nedostupný zdroj → přerušit** úlohu dřív, než vznikne jakákoli akce `Delete`.
+2. **Práh mazání**: pokud plán Zrcadla maže > nastavený % souborů cíle, vyžaduj potvrzení z UI.
+3. **Mazání až po kopírování** – fáze Delete běží jen po úspěšném dokončení Copy/Update.
+4. **Atomické kopie**: zápis do `*.dbs-partial`, pak `rename`; při chybě/zrušení partial smazat.
+5. **Nenásledovat** symlinky ani junctiony (reparse points) – ani ve zdroji, ani v cíli.
+6. **Překryv**: cíl nesmí být uvnitř zdroje a zdroj nesmí být uvnitř cíle.
+7. **Mimo cílovou složku nic nemazat** – každou mazanou cestu ověř, že začíná kořenem cíle.
+8. Režim Aktualizace **nikdy nemaže**.
+9. Porovnání mtime s tolerancí (výchozí 2 s); velikost se porovnává přesně.
+10. Disk se resolvuje přes UUID značky → sériové číslo; nesoulad = varování, ne tichý pokračování.
+
+## Testy povinné pro každou změnu enginu
+- Zrcadlo s prázdným zdrojem nic nesmaže.
+- Zrušení uprostřed nezanechá `*.dbs-partial` a nepoškodí existující soubory.
+- Symlink/junction ve zdroji se nepřekopíruje ani nenásleduje.
+- Cesty > 260 znaků a diakritika (`Fotky/Dovolená Šumava`) fungují.

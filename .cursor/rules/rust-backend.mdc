@@ -1,0 +1,30 @@
+---
+description: Konvence pro Rust kód (backup-core a src-tauri)
+globs: crates/**/*.rs,src-tauri/**/*.rs
+alwaysApply: false
+---
+
+# Rust konvence
+
+- Edition 2021+, `cargo clippy --workspace -- -D warnings` musí projít, formát `rustfmt`.
+- Chyby: v `backup-core` typované přes `thiserror`; `anyhow` jen v `src-tauri`/binárkách.
+- Žádné `unwrap()`/`expect()` mimo testy (výjimka: zdokumentovaný invariant).
+- `domain/` je čistý – žádné I/O, žádné Win32 volání. I/O jen v `volumes/`, `engine/`, `storage/`.
+- Win32 volání izolovat v `volumes/win.rs` za funkcemi s bezpečným rozhraním; `unsafe` bloky
+  minimální a s komentářem `// SAFETY:`.
+- Dlouhé blokující operace mimo hlavní vlákno (`tauri::async_runtime::spawn_blocking`).
+- Zrušení přes sdílený `CancellationToken`/`AtomicBool`, kontrolovat mezi soubory.
+
+## Tauri příkazy
+```rust
+// ✅ tenký příkaz, logika v core, typovaná chyba serializovaná pro UI
+#[tauri::command]
+#[specta::specta]
+pub async fn list_volumes(state: State<'_, AppState>) -> Result<Vec<VolumeInfo>, AppError> {
+    Ok(backup_core::volumes::enumerate()?)
+}
+```
+
+## Testy
+- Unit testy vedle kódu (`#[cfg(test)]`), integrační v `crates/backup-core/tests/`.
+- FS testy výhradně v `tempfile::TempDir`; nikdy nesahat na reálné disky uživatele.

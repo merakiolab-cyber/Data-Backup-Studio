@@ -1,0 +1,26 @@
+---
+description: Konvence pro React + TypeScript frontend
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: false
+---
+
+# Frontend konvence
+
+- TypeScript `strict`, žádné `any` (použij `unknown` + zúžení). Lint/format: Biome.
+- Funkční komponenty, pojmenované exporty, 1 komponenta = 1 soubor (`PascalCase.tsx`).
+- Struktura podle feature: `src/features/<feature>/{components,hooks,api.ts}`.
+- Backend volat **jen** přes generované `src/lib/bindings.ts` (tauri-specta), nikdy `invoke('…')` ručně.
+- Data z backendu přes TanStack Query (`useQuery`/`useMutation`), lokální UI stav přes Zustand.
+- Události průběhu (`run-progress`) odebírat v hooku s úklidem v `useEffect` cleanup.
+- Žádné přímé `@tauri-apps/plugin-fs` – souborové operace dělá výhradně Rust.
+
+```tsx
+// ✅
+export function useJobs() {
+  return useQuery({ queryKey: ['jobs'], queryFn: () => commands.listJobs() });
+}
+// ❌ invoke('list_jobs') – netypované, obchází bindings
+```
+
+## Testy
+Vitest + Testing Library pro hooky a komponenty s logikou; bindings mockovat.

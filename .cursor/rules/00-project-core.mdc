@@ -1,0 +1,28 @@
+---
+description: Základní kontext projektu Data Backup Studio, pracovní postup a paměť projektu
+alwaysApply: true
+---
+
+# Data Backup Studio – jádro
+
+Offline Windows desktop app (Tauri 2 + Rust + React/TS + MUI) pro zálohu složek na USB disky.
+Detaily: `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, `docs/decisions/`.
+
+## Pracovní postup
+1. Na začátku úkolu přečti `CHANGELOG.md` → `[Unreleased]` a odpovídající fázi v `docs/ROADMAP.md`.
+2. Logika patří do `crates/backup-core`; `src-tauri` jen mapuje příkazy/události; `src/` je UI.
+3. Před dokončením spusť `pnpm check` a relevantní testy; nehlas hotovo, pokud padají.
+4. Na konci úkolu aplikuj skill `project-memory` (CHANGELOG, ROADMAP, případně ADR).
+
+## Jazyk
+- UI texty a dokumentace: čeština. Kód, identifikátory, commit zprávy: angličtina.
+
+## Commity
+Conventional Commits: `feat(engine): add mirror delete guard`, `fix(volumes): …`, `docs: …`.
+Scope: `engine`, `volumes`, `jobs`, `storage`, `ui`, `tauri`, `build`, `docs`.
+
+## Neporušitelné zásady
+- Žádné cesty s písmenem disku v perzistentních datech – jen `Location { volume_id, rel_path }`.
+- Žádná síť, CDN, telemetrie, vzdálené fonty. Vše přibalené.
+- Nikdy nesmazat data v cíli, pokud je zdroj prázdný nebo nedostupný.
+- Nepřidávej závislost bez zdůvodnění; preferuj existující stack.

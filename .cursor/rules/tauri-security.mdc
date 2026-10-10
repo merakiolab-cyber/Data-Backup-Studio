@@ -1,0 +1,16 @@
+---
+description: Bezpečnostní nastavení Tauri – capabilities, CSP, validace vstupů
+globs: src-tauri/**,src-tauri/capabilities/**,src-tauri/tauri.conf.json
+alwaysApply: false
+---
+
+# Tauri bezpečnost
+
+- Capabilities minimální: `core:default`, `dialog:allow-open` (výběr složky). Nic dalšího bez ADR.
+- **Nepovolovat** `fs`, `shell`, `http`, `updater` pluginy pro frontend.
+- CSP v `tauri.conf.json`: `default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost`.
+  Žádné externí domény.
+- Každý příkaz validuje vstup v Rustu: UUID existují, `rel_path` je relativní a bez `..`,
+  cesty se kanonizují a kontroluje se překryv zdroj/cíl.
+- Chyby vracet jako typované `AppError` bez citlivých detailů systému; detail jen do logu.
+- Aplikace běží bez admin práv; nepřidávat `requireAdministrator` do manifestu.

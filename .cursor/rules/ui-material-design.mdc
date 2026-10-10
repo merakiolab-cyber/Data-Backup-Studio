@@ -1,0 +1,21 @@
+---
+description: Material Design 3 zásady pro UI komponenty a obrazovky
+globs: src/**/*.tsx,src/app/theme/**
+alwaysApply: false
+---
+
+# UI – Material Design 3 (MUI)
+
+Plná specifikace: `docs/UI-UX.md`.
+
+- Používej MUI komponenty a **tokeny tématu** (`theme.palette`, `theme.spacing`, `theme.shape`).
+  Žádné natvrdo psané barvy, px okraje ani vlastní fonty mimo téma.
+- Mřížka 8 px (`spacing(1)` = 8 px), zaoblení karet 16 px, tlačítek plné (M3).
+- Navigace: Navigation Rail vlevo. Hlavní akce obrazovky = jedno filled tlačítko / FAB.
+- Stav (OK / varování / chyba / disk nepřipojen) vždy **ikona + text**, nikdy jen barva.
+- Destruktivní akce: dialog s náhledem dopadu a explicitním potvrzením.
+- Prázdné stavy: ikona, jedna věta, jedna akce („Zatím nemáš žádnou úlohu. Vytvořit úlohu“).
+- Texty česky, tykání, slovesem. Čísla a velikosti formátovat `cs-CZ` (`1,2 GB`, `12 345 souborů`).
+- Přístupnost: `aria-label` u ikonových tlačítek, viditelný fokus, kontrast AA.
+- Animace 150–250 ms, respektovat `prefers-reduced-motion`.
+- Ikony: `@mui/icons-material` varianta `Rounded`.
