@@ -4,13 +4,14 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Tooltip from '@mui/material/Tooltip';
 import {
   DatabaseBackup,
+  FolderSync,
   HardDrive,
   History,
   LayoutGrid,
   type LucideIcon,
   Settings,
 } from 'lucide-react';
-import { NavLink, useLocation } from 'react-router';
+import { NavLink } from 'react-router';
 import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { useVolumes } from '@/features/volumes/api';
@@ -19,12 +20,11 @@ interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
-  /** Nested screens that keep this item highlighted. */
-  children?: string;
 }
 
 const mainItems: NavItem[] = [
-  { to: '/', label: 'Přehled', icon: LayoutGrid, children: '/ulohy' },
+  { to: '/', label: 'Přehled', icon: LayoutGrid },
+  { to: '/ulohy', label: 'Úlohy', icon: FolderSync },
   { to: '/disky', label: 'Disky', icon: HardDrive },
   { to: '/historie', label: 'Historie', icon: History },
 ];
@@ -93,8 +93,6 @@ export function Sidebar() {
 
 function RailLink({ item, badge }: { item: NavItem; badge: number }) {
   const Icon = item.icon;
-  const { pathname } = useLocation();
-  const inChild = item.children !== undefined && pathname.startsWith(item.children);
   return (
     <Tooltip title={item.label} placement="right">
       <NavLink
@@ -103,49 +101,46 @@ function RailLink({ item, badge }: { item: NavItem; badge: number }) {
         aria-label={item.label}
         style={{ borderRadius: 999 }}
       >
-        {({ isActive: exact }) => {
-          const isActive = exact || inChild;
-          return (
-            <Badge
-              badgeContent={badge}
-              overlap="circular"
+        {({ isActive }) => (
+          <Badge
+            badgeContent={badge}
+            overlap="circular"
+            sx={(theme) => ({
+              '& .MuiBadge-badge': {
+                bgcolor: ds(theme).badge,
+                color: '#FFFFFF',
+                fontWeight: 700,
+                minWidth: 18,
+                height: 18,
+                fontSize: '0.6875rem',
+              },
+            })}
+          >
+            <ButtonBase
+              component="span"
+              aria-current={isActive ? 'page' : undefined}
               sx={(theme) => ({
-                '& .MuiBadge-badge': {
-                  bgcolor: ds(theme).badge,
-                  color: '#FFFFFF',
-                  fontWeight: 700,
-                  minWidth: 18,
-                  height: 18,
-                  fontSize: '0.6875rem',
+                width: 52,
+                height: 52,
+                borderRadius: '50%',
+                color: isActive ? ds(theme).ink : ds(theme).inkMuted,
+                bgcolor: isActive ? ds(theme).surface : 'transparent',
+                boxShadow: isActive ? ds(theme).shadow : 'none',
+                transition: theme.transitions.create(['background-color', 'color'], {
+                  duration: theme.transitions.duration.shorter,
+                }),
+                '& svg': { transition: `transform ${duration.hover}ms ${ease.spring}` },
+                '&:hover': {
+                  color: ds(theme).ink,
+                  bgcolor: isActive ? undefined : ds(theme).muted,
                 },
+                '&:hover svg': { transform: 'translateY(-2px)' },
               })}
             >
-              <ButtonBase
-                component="span"
-                aria-current={isActive ? 'page' : undefined}
-                sx={(theme) => ({
-                  width: 52,
-                  height: 52,
-                  borderRadius: '50%',
-                  color: isActive ? ds(theme).ink : ds(theme).inkMuted,
-                  bgcolor: isActive ? ds(theme).surface : 'transparent',
-                  boxShadow: isActive ? ds(theme).shadow : 'none',
-                  transition: theme.transitions.create(['background-color', 'color'], {
-                    duration: theme.transitions.duration.shorter,
-                  }),
-                  '& svg': { transition: `transform ${duration.hover}ms ${ease.spring}` },
-                  '&:hover': {
-                    color: ds(theme).ink,
-                    bgcolor: isActive ? undefined : ds(theme).muted,
-                  },
-                  '&:hover svg': { transform: 'translateY(-2px)' },
-                })}
-              >
-                <Icon size={22} />
-              </ButtonBase>
-            </Badge>
-          );
-        }}
+              <Icon size={22} />
+            </ButtonBase>
+          </Badge>
+        )}
       </NavLink>
     </Tooltip>
   );

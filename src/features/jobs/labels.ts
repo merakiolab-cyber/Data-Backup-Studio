@@ -21,6 +21,14 @@ export const suggestedExcludes = [
   'desktop.ini',
 ] as const;
 
+/** Czech plural after a count: 1 úloha, 2 úlohy, 5 úloh. */
+export function jobsLabel(count: number): string {
+  if (count === 1) {
+    return 'úloha';
+  }
+  return count >= 2 && count <= 4 ? 'úlohy' : 'úloh';
+}
+
 /** Last folder name of a relative path, e.g. `Fotky` for `Dokumenty\Fotky`. */
 export function leafName(relPath: string): string {
   return relPath.split('\\').filter(Boolean).at(-1) ?? '';

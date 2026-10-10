@@ -30,7 +30,7 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Úložiště `config.json` (atomický zápis, schéma v2 s migrací z v1)
 - [x] Zdrojové disky bez značky (GUID + sériové číslo), výběr složky přes dialog → `locate_folder`
 - [x] Editor úlohy: zdroj, cíl, režim, vyloučení, název
-- [x] Přehled úloh (karty se stavem disků; poslední běh doplní fáze 5)
+- [x] Přehled úloh (karty se stavem disků; poslední běh doplní fáze 5) – samostatná stránka Úlohy v menu
 - [x] Karta Statistiky na Přehledu (z disků a úloh; statistiky záloh – objem, počet běhů – doplní fáze 5)
 - [ ] Ruční test se skutečnými disky (vytvořit úlohu, přepojit USB → cesta na kartě se změní)
 

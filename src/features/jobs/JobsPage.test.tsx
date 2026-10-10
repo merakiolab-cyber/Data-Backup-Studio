@@ -1,10 +1,12 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router';
 import { theme } from '@/app/theme/theme';
+import { OverviewPage } from '@/features/overview/OverviewPage';
 import type { JobView, VolumesOverview } from '@/lib/bindings';
-import { OverviewPage } from './OverviewPage';
+import { JobsPage } from './JobsPage';
 
 const volumes: VolumesOverview = { registered: [], available: [] };
 
@@ -41,22 +43,20 @@ vi.mock('@/lib/bindings', () => ({
   },
 }));
 
-function renderPage() {
+function renderPage(page: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <ThemeProvider theme={theme}>
-        <MemoryRouter>
-          <OverviewPage />
-        </MemoryRouter>
+        <MemoryRouter>{page}</MemoryRouter>
       </ThemeProvider>
     </QueryClientProvider>,
   );
 }
 
-describe('OverviewPage', () => {
+describe('JobsPage', () => {
   it('shows job cards with current paths and readiness', async () => {
-    renderPage();
+    renderPage(<JobsPage />);
     const ready = await screen.findByRole('article', { name: 'Fotky' });
     expect(within(ready).getByText('G:\\Záloha\\Fotky')).toBeInTheDocument();
     expect(within(ready).getByText('Připraveno')).toBeInTheDocument();
@@ -64,6 +64,14 @@ describe('OverviewPage', () => {
     const waiting = screen.getByRole('article', { name: 'Archiv' });
     expect(within(waiting).getByText('\\Záloha\\Fotky')).toBeInTheDocument();
     expect(within(waiting).getByText('Disk nepřipojený')).toBeInTheDocument();
-    expect(screen.getByText('Úlohy připravené ke spuštění')).toBeInTheDocument();
+  });
+});
+
+describe('OverviewPage', () => {
+  it('summarizes jobs without listing them', async () => {
+    renderPage(<OverviewPage />);
+    expect(await screen.findByText('Úlohy připravené ke spuštění')).toBeInTheDocument();
+    expect(screen.getByRole('article', { name: 'Statistiky' })).toBeInTheDocument();
+    expect(screen.queryByRole('article', { name: 'Fotky' })).not.toBeInTheDocument();
   });
 });

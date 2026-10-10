@@ -18,6 +18,10 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Konfigurace schéma v2 (`jobs`, `sources`) s načtením v1. Závislost `globset` pro kontrolu vzorů.
 - ADR 0005. Testy: 47 v jádře (+22), frontend 9 (formulář úlohy, karty na Přehledu).
 
+### Změněno – navigace
+- **Úlohy mají vlastní stránku** `#/ulohy` a položku v menu (mezi Přehledem a Disky). Editor
+  se vrací na Úlohy. Přehled ukazuje jen dlaždice a Statistiky (bez úloh výzvu k první úloze).
+
 ### Přidáno – statistiky
 - Karta **Statistiky** na Přehledu: celková kapacita cílových disků, volné místo na připojených,
   počet úloh podle režimu, počet vzorů vyloučení a pruh zaplnění každého cílového disku

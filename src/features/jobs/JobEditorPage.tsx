@@ -37,8 +37,8 @@ export function JobEditorPage() {
   const jobs = useJobs();
   const navigate = useNavigate();
   const back = (
-    <Tooltip title="Zpět na přehled">
-      <IconButton aria-label="Zpět na přehled" onClick={() => navigate('/')}>
+    <Tooltip title="Zpět na úlohy">
+      <IconButton aria-label="Zpět na úlohy" onClick={() => navigate('/ulohy')}>
         <ArrowLeft size={20} />
       </IconButton>
     </Tooltip>
@@ -71,8 +71,8 @@ export function JobEditorPage() {
           title="Úloha neexistuje"
           description="Mohla být mezitím smazaná."
           action={
-            <Button component={Link} to="/" variant="contained">
-              Zpět na přehled
+            <Button component={Link} to="/ulohy" variant="contained">
+              Zpět na úlohy
             </Button>
           }
         />
@@ -122,7 +122,7 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (input && !save.isPending) {
-      save.mutate({ id: jobId, input }, { onSuccess: () => navigate('/') });
+      save.mutate({ id: jobId, input }, { onSuccess: () => navigate('/ulohy') });
     }
   };
 
@@ -275,7 +275,7 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, pt: 1 }}>
-        <Button onClick={() => navigate('/')}>Zrušit</Button>
+        <Button onClick={() => navigate('/ulohy')}>Zrušit</Button>
         <Button
           type="submit"
           variant="contained"

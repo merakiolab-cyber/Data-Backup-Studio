@@ -13,14 +13,15 @@ s vlastními tokeny (rozhodnutí: [ADR 0004](decisions/0004-visual-style.md)). J
 ## Rozvržení
 - Pozadí: jemný přechod mint → levandule přes celé okno.
 - Vlevo úzký **sidebar**: černé kulaté logo, pill skupina kulatých ikonových odkazů
-  (Přehled · Disky · Historie) s tooltipem a červeným badge počtu, dole Nastavení.
+  (Přehled · Úlohy · Disky · Historie) s tooltipem a červeným badge počtu, dole Nastavení.
 - Titulek obrazovky na pozadí, obsah na velkém bílém listu (zaoblení 32 px, max. ~1120 px).
 - Mřížka 8 px, karty 24–28 px, tlačítka a chipy pill. Minimální velikost okna 960×640.
 
 ## Obrazovky
 | Obrazovka | Obsah |
 |---|---|
-| Přehled | Pastelové dlaždice (připojené disky, úlohy, poslední záloha), karta Statistiky (kapacita a volno cílů, úlohy podle režimu, vzory vyloučení, zaplnění každého cílového disku), karty úloh, „Nová úloha“, „Spustit vše“ |
+| Přehled | Pastelové dlaždice (připojené disky, úlohy, poslední záloha), karta Statistiky (kapacita a volno cílů, úlohy podle režimu, vzory vyloučení, zaplnění každého cílového disku); bez úloh výzva „Nová úloha“ |
+| Úlohy (`#/ulohy`) | Karty úloh se stavem disků a „Spustit“, „Nová úloha“ v hlavičce, „Spustit vše“ |
 | Editor úlohy | Název, zdroj (výběr složky), cíl (registrovaný disk + složka), režim (přepínač), vyloučení (chips) |
 | Náhled plánu | Souhrn: kopírovat / aktualizovat / smazat (počty, objem), rozbalitelný seznam, „Spustit“ |
 | Běh | Lineární průběh, rychlost, ETA, aktuální soubor, „Zrušit“ |
