@@ -39,7 +39,7 @@ export function Page({ title, description, actions, children }: PageProps) {
           backdropFilter: 'blur(24px)',
         })}
       >
-        <Box sx={{ maxWidth: 1120, mx: 'auto', p: 4, ...enter(60) }}>{children}</Box>
+        <Box sx={{ width: '100%', boxSizing: 'border-box', p: 4, ...enter(60) }}>{children}</Box>
       </Box>
     </Box>
   );

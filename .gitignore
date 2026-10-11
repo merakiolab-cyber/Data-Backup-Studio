@@ -9,8 +9,8 @@ dist/
 *.tsbuildinfo
 coverage/
 
-# Tauri
-src-tauri/gen/schemas/
+# Tauri (generated ACL / JSON schemas)
+src-tauri/gen/
 
 # Release artefakty (archivují se mimo git)
 releases/

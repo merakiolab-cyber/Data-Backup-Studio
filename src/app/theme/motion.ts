@@ -12,16 +12,11 @@ export const ease = {
   spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
 } as const;
 
-export const duration = { press: 120, hover: 200, enter: 420, value: 700 } as const;
+export const duration = { press: 120, hover: 200, enter: 420, fold: 520, value: 700 } as const;
 
 export const riseIn = keyframes`
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
-`;
-
-export const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
 `;
 
 export const popIn = keyframes`

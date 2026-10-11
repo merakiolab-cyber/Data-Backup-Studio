@@ -4,12 +4,18 @@ import { unwrap } from '@/lib/result';
 
 const volumesKey = ['volumes'] as const;
 
-/** Polls while the window is focused so plugging in a USB disk shows up within seconds. */
+/** Polls only while the window is focused so a USB disk appears within seconds. */
 export function useVolumes() {
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: volumesKey,
-    queryFn: async () => unwrap(await commands.listVolumes()),
-    refetchInterval: 4000,
+    queryFn: async () => {
+      const data = unwrap(await commands.listVolumes());
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      return data;
+    },
+    refetchInterval: () => (document.hasFocus() ? 4000 : false),
+    refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
   });
 }
@@ -40,4 +46,10 @@ export function useUnregisterVolume() {
 
 export function useConfirmVolume() {
   return useVolumeMutation(async (id: VolumeId) => unwrap(await commands.confirmVolume(id)));
+}
+
+export function useReorderVolumes() {
+  return useVolumeMutation(async (orderedIds: VolumeId[]) =>
+    unwrap(await commands.reorderVolumes(orderedIds)),
+  );
 }

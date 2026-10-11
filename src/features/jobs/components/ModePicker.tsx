@@ -3,10 +3,12 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Typography from '@mui/material/Typography';
 import { CopyCheck, FilePlus2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { cardGridSx } from '@/app/theme/layout';
 import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { BackupMode } from '@/lib/bindings';
+import { useT } from '@/lib/i18n';
 import { modeLabels } from '../labels';
 
 const icons: Record<BackupMode, ReactNode> = {
@@ -14,7 +16,7 @@ const icons: Record<BackupMode, ReactNode> = {
   mirror: <CopyCheck size={22} />,
 };
 
-const order: BackupMode[] = ['update', 'mirror'];
+const order: BackupMode[] = ['mirror', 'update'];
 
 export function ModePicker({
   value,
@@ -23,16 +25,10 @@ export function ModePicker({
   value: BackupMode;
   onChange: (mode: BackupMode) => void;
 }) {
+  const { t } = useT();
+  const labels = modeLabels(t);
   return (
-    <Box
-      role="radiogroup"
-      aria-label="Režim zálohy"
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: 1.5,
-      }}
-    >
+    <Box role="radiogroup" aria-label={t.mode.group} sx={cardGridSx('compact', 1.5)}>
       {order.map((mode) => {
         const selected = mode === value;
         return (
@@ -70,9 +66,9 @@ export function ModePicker({
               </IconBubble>
             </Box>
             <Box>
-              <Typography variant="subtitle1">{modeLabels[mode].title}</Typography>
+              <Typography variant="subtitle1">{labels[mode].title}</Typography>
               <Typography variant="body2" sx={{ opacity: 0.75 }}>
-                {modeLabels[mode].description}
+                {labels[mode].description}
               </Typography>
             </Box>
           </ButtonBase>

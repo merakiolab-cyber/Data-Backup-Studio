@@ -32,6 +32,9 @@ pub enum CoreError {
     #[error("Volume is not registered")]
     VolumeNotRegistered,
 
+    #[error("Volume order must list each registered disk exactly once")]
+    InvalidVolumeOrder,
+
     #[error("More than one connected volume carries the same identity")]
     AmbiguousVolume,
 
@@ -46,6 +49,9 @@ pub enum CoreError {
 
     #[error("Unsupported config schema version {found}")]
     UnsupportedSchema { found: u32 },
+
+    #[error("Invalid settings: {0:?}")]
+    InvalidSettings(crate::domain::SettingsProblem),
 
     #[error("Invalid path: {0:?}")]
     InvalidPath(PathProblem),
@@ -65,6 +71,12 @@ pub enum CoreError {
     #[error("Job not found")]
     JobNotFound,
 
+    #[error("Job group not found")]
+    GroupNotFound,
+
+    #[error("Too many job groups")]
+    TooManyGroups,
+
     #[error("Volume is used by {jobs} job(s)")]
     VolumeInUse { jobs: usize },
 
@@ -73,6 +85,36 @@ pub enum CoreError {
 
     #[error("Folder {path} is not on a local volume")]
     FolderNotOnVolume { path: PathBuf },
+
+    #[error("Source folder is empty or unavailable; refusing to change the target")]
+    SourceEmpty,
+
+    #[error("Source folder is not accessible")]
+    SourceUnavailable,
+
+    #[error("Not enough free space on the target disk")]
+    InsufficientSpace,
+
+    #[error("Mirror would delete more than the allowed share of the target; confirmation required")]
+    DeleteThresholdExceeded,
+
+    #[error("Copy verification failed for {path}")]
+    VerifyFailed { path: String },
+
+    #[error("Backup run was cancelled")]
+    Cancelled,
+
+    #[error("Source or target disk is not connected")]
+    EndpointDisconnected,
+
+    #[error("Source or target disk needs confirmation before use")]
+    EndpointNeedsConfirmation,
+
+    #[error("History database error: {0}")]
+    Database(String),
+
+    #[error("Run not found")]
+    RunNotFound,
 }
 
 impl CoreError {

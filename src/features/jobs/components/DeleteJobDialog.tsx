@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { fmt, useT } from '@/lib/i18n';
 
 interface DeleteJobDialogProps {
   open: boolean;
@@ -23,13 +24,12 @@ export function DeleteJobDialog({
   onConfirm,
   onClose,
 }: DeleteJobDialogProps) {
+  const { t } = useT();
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Smazat úlohu „{name}“?</DialogTitle>
+      <DialogTitle>{fmt(t.jobs.deleteTitle, { name })}</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          Smaže se jen nastavení úlohy. Soubory ve zdroji i v záloze zůstanou beze změny.
-        </DialogContentText>
+        <DialogContentText>{t.jobs.deleteBody}</DialogContentText>
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error.message}
@@ -37,9 +37,9 @@ export function DeleteJobDialog({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Zrušit</Button>
+        <Button onClick={onClose}>{t.common.cancel}</Button>
         <Button color="error" variant="contained" onClick={onConfirm} loading={pending}>
-          Smazat
+          {t.common.delete}
         </Button>
       </DialogActions>
     </Dialog>

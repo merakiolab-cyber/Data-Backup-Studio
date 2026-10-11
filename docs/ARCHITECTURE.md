@@ -12,7 +12,7 @@ jednotky** – disky se identifikují podle vlastní identity, takže změna `F:
 | Režimy zálohy | **Zrcadlo** (cíl = přesná kopie, maže se) a **Aktualizace** (jen nové/změněné, nic se nemaže) |
 | Spouštění | Ručně (jedna úloha / vybrané / všechny) |
 | Formát zálohy | Obyčejné soubory 1:1 – čitelné i bez aplikace |
-| Jazyk UI | Čeština |
+| Jazyk UI | Čeština (výchozí), angličtina v Nastavení |
 | Design | Material Design 3, minimalistický, světlý/tmavý režim |
 
 ## 2. Technologický stack
@@ -33,7 +33,7 @@ jednotky** – disky se identifikují podle vlastní identity, takže změna `F:
 | Typy Rust ↔ TS | `tauri-specta` | Typově bezpečné příkazy, TS typy generované z Rustu |
 | Frontend | **React 19 + TypeScript (strict) + Vite** | Ekosystém, rychlý vývoj |
 | UI knihovna | **MUI (Material UI)** s vlastním M3 tématem | Hotové přístupné komponenty v Material Designu |
-| Datová vrstva UI | TanStack Query (volání backendu) + Zustand (stav UI) | Jasné oddělení serverového a lokálního stavu |
+| Datová vrstva UI | TanStack Query + `RunSessionProvider` pro běh | Serverový stav v Query; aktivní záloha jako app-wide session |
 | Routing | React Router | Jednoduché obrazovky |
 | Písma / ikony | `@fontsource-variable/urbanist`, `lucide-react` | Vše přibalené – žádný CDN, funguje offline |
 | Lint / formát | `clippy`, `rustfmt`, **Biome** (TS) | Rychlé, jeden nástroj pro TS lint + format |
@@ -74,7 +74,7 @@ Data-backup-studio/
 │  └─ tauri.conf.json
 └─ src/                      # React frontend
    ├─ app/                   # providers, router, téma
-   ├─ features/              # jobs/, volumes/, runs/, history/, settings/
+   ├─ features/              # jobs/ (+ runSession), volumes/, history/, settings/, overview/
    ├─ components/            # sdílené UI komponenty
    ├─ lib/                   # bindings.ts (generované), utils
    └─ main.tsx
@@ -123,8 +123,14 @@ UI průběžně ukazuje, které registrované disky jsou připojené a pod jaký
   `needsConfirmation` (`serialChanged`, `markerMissing`, `duplicate`), `disconnected`.
 - `volumes/registry.rs` – registrace, přejmenování, odebrání, potvrzení disku.
 - `storage/config.rs` – `ConfigStore.update()` je transakční: změna na kopii → atomický zápis → teprve pak v paměti.
-- Příkazy dostávají `guid_path`/`id`, nikdy cestu; svazek se vždy dohledá v čerstvé enumeraci.
-- UI obnovuje seznam disků každé 4 s (jen když je okno aktivní).
+  Schéma v4 přidává `groups` a volitelné `job.groupId` (pojmenované složky úloh).
+  Schéma v3 přidalo `settings` (souběžné kopie, tolerance mtime, práh mazání, volitelné
+  ověření kopií, jazyk UI). Export/import jen konfigurace, bez historie.
+  ADR 0007, 0008, 0009, 0011.
+- Příkazy dostávají `guid_path`/`id`, nikdy cestu; svazek se vždy dohledá v enumeraci.
+  Seznam disků/úloh sdílí krátkou cache (~1,2 s); registrace, náhled a běh enumerují znovu.
+- UI obnovuje seznam disků každé 4 s (jen když je okno aktivní). Úlohy se obnoví z téhož pollu.
+- Import konfigurace znovu validuje úlohy (stejná pravidla jako editor).
 
 ### Implementace úloh (fáze 3)
 Podrobně v [ADR 0005](decisions/0005-job-locations.md).
@@ -132,9 +138,24 @@ Podrobně v [ADR 0005](decisions/0005-job-locations.md).
 - `domain/job.rs` – `Job`, `BackupMode`, `JobSpec::validate()` (název, cesty, cíl není kořen, překryv, `globset`).
 - `jobs/locate.rs` – absolutní cesta z dialogu → svazek + relativní cesta (`LocatedFolder`), nic neukládá.
 - `jobs/mod.rs` – vytvoření/úprava/smazání úlohy, zapamatování zdrojových disků (`config.sources`),
-  zákaz překryvu cílových složek, zákaz odebrání disku používaného úlohou, `JobView` pro UI.
+  zákaz překryvu cílových složek, zákaz odebrání disku používaného úlohou, `JobView` pro UI,
+  skupiny úloh (`create_group` / `rename_group` / `delete_group` / `set_jobs_group`, `JobsOverview`).
+- `domain/group.rs` – `JobGroup`, validace názvu, limit počtu skupin.
+
+### Implementace historie (fáze 5)
+Podrobně v [ADR 0006](decisions/0006-run-history.md).
+- `storage/history.rs` – `HistoryStore` nad `history.db` (SQLite, `rusqlite` bundled) vedle `config.json`
+  v `%APPDATA%\app.databackupstudio\`. Žádné písmeno disku ani absolutní cesta.
+- Souhrn běhu (název úlohy v okamžiku běhu, režim, počty, byty, stav) + tabulka chyb.
+- Příkazy `list_runs` / `get_run` / `get_run_log`; `run_job` zapíše výsledek i předčasné selhání
+  (prázdný zdroj, odpojený disk).
+- Textový log běhu v `logs\{run_id}.log` (relativní cesty, rotace na 80 nejnovějších souborů).
 
 ## 5. Záložní engine
+
+Implementace ve `crates/backup-core/src/engine/` (fáze 4): `preflight` → `scan` → `plan` → `execute`.
+UI volá `preview_job` (náhled) a `run_job` (běh s `run-progress`). Primární režim je **Zrcadlo**
+(přesný otisk zdroje); Aktualizace nikdy nemaže.
 
 Průběh jedné úlohy:
 
@@ -143,9 +164,12 @@ Průběh jedné úlohy:
 2. **Scan** – paralelně projít zdroj i cíl → mapy `relPath → (velikost, mtime, atributy)`.
 3. **Diff → plán** – akce `CreateDir`, `Copy` (nový), `Update` (změněný), `Delete` (jen Zrcadlo).
    Změna = jiná velikost nebo mtime mimo toleranci (2 s kvůli FAT32/exFAT a letnímu času).
-4. **Náhled plánu** – počty a objem (zkopíruje 1 204 souborů / 38 GB, smaže 12) → potvrzení.
-5. **Execute** – kopie do `název.dbs-partial`, po dokončení atomické přejmenování a nastavení
-   mtime. Nedokončená kopie nikdy nepřepíše platný soubor.
+   Soubory, které už v cíli sedí, se nechají – i při prvním běhu a i když zálohu dřív dělal
+   jiný program. Plná kopie je jen když je cíl prázdný.
+4. **Náhled plánu** – ponechá / zkopíruje / aktualizuje / smaže (počty a objem) → potvrzení.
+5. **Execute** – kopie do `název.dbs-partial`, volitelně ověření blake3 zdroje a kopie,
+   pak atomické přejmenování a nastavení mtime. Nedokončená nebo neověřená kopie nikdy
+   nepřepíše platný soubor.
 6. **Report** – souhrn do `history.db`, detailní log do souboru, chyby (zamčené soubory,
    přístup odepřen) se sbírají a úloha pokračuje.
 
@@ -158,9 +182,13 @@ Průběh jedné úlohy:
 
 ### Výkon
 - Paralelní scan, konfigurovatelný počet souběžných kopií (výchozí 4; USB HDD méně, SSD více).
-- Velké soubory kopírovány přes `CopyFileExW` (nativní, rychlé, s průběhem).
+- Volitelné ověření kopií (blake3) čte zapsaný soubor znovu; výchozí vypnuto.
+- Kopírování po 1 MB blocích do `.dbs-partial` a atomické přejmenování (ne `fs::copy` –
+  ten nešlo zrušit uprostřed souboru).
 - Události o průběhu omezené na ~10/s, aby UI nezahlcovaly.
-- Zrušení běhu kdykoli (bezpečně – rozpracovaná `.dbs-partial` se uklidí).
+- Zrušení běhu kdykoli (kontrola mezi bloky; rozpracovaná `.dbs-partial` se uklidí).
+- UI běhu: `RunSessionProvider` + dialog / minimalizovaná lišta; další úlohy do fronty
+  (souběžně běží jen jedna). ADR 0010.
 
 ## 6. Bezpečnost
 

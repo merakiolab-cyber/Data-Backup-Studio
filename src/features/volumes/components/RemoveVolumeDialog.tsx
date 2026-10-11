@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { fmt, useT } from '@/lib/i18n';
 
 interface RemoveVolumeDialogProps {
   open: boolean;
@@ -23,14 +24,12 @@ export function RemoveVolumeDialog({
   onConfirm,
   onClose,
 }: RemoveVolumeDialogProps) {
+  const { t } = useT();
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Odebrat disk „{name}“?</DialogTitle>
+      <DialogTitle>{fmt(t.volumes.removeTitle, { name })}</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          Aplikace na disk zapomene. Data na disku zůstanou beze změny a disk můžeš kdykoli znovu
-          zaregistrovat.
-        </DialogContentText>
+        <DialogContentText>{t.volumes.removeBody}</DialogContentText>
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error.message}
@@ -38,9 +37,9 @@ export function RemoveVolumeDialog({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Zrušit</Button>
+        <Button onClick={onClose}>{t.common.cancel}</Button>
         <Button color="error" variant="contained" onClick={onConfirm} loading={pending}>
-          Odebrat
+          {t.volumes.removeAction}
         </Button>
       </DialogActions>
     </Dialog>

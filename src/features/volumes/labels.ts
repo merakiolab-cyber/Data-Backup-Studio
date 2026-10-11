@@ -1,27 +1,31 @@
 import type { BusKind, ConfirmReason, LiveVolume } from '@/lib/bindings';
 import { formatBytes } from '@/lib/format';
+import type { Messages } from '@/lib/i18n';
 
-const busLabels: Record<BusKind, string> = {
-  usb: 'USB',
-  sata: 'SATA',
-  nvme: 'NVMe',
-  sd: 'SD karta',
-  other: 'Jiné připojení',
-  unknown: 'Neznámé připojení',
-};
-
-export function busLabel(bus: BusKind): string {
-  return busLabels[bus];
+export function busLabel(bus: BusKind, t: Messages): string {
+  switch (bus) {
+    case 'usb':
+      return 'USB';
+    case 'sata':
+      return 'SATA';
+    case 'nvme':
+      return 'NVMe';
+    case 'sd':
+      return t.volumes.busSd;
+    case 'other':
+      return t.volumes.busOther;
+    default:
+      return t.volumes.busUnknown;
+  }
 }
 
-export const confirmReasonText: Record<ConfirmReason, string> = {
-  serialChanged:
-    'Disk má naši značku, ale jiné sériové číslo. Mohl být naklonovaný nebo přeformátovaný. Potvrď, že jde o správný disk.',
-  markerMissing:
-    'Sériové číslo sedí, ale chybí identifikační složka .databackupstudio. Potvrď, že jde o správný disk, a značka se obnoví.',
-  duplicate:
-    'Jsou připojené dva disky se stejnou identitou (třeba klon). Odpoj jeden z nich, ať je jasné, kam zálohovat.',
-};
+export function confirmReasonText(t: Messages): Record<ConfirmReason, string> {
+  return {
+    serialChanged: t.volumes.reasonSerial,
+    markerMissing: t.volumes.reasonMarker,
+    duplicate: t.volumes.reasonDuplicate,
+  };
+}
 
 /** Suggested name for a new registration, e.g. `Záloha 1,8 TB`. */
 export function suggestName(volume: LiveVolume): string {
@@ -30,6 +34,9 @@ export function suggestName(volume: LiveVolume): string {
 }
 
 /** One-line technical description: `WD Elements 25A2 · USB · NTFS`. */
-export function describeVolume(volume: Pick<LiveVolume, 'model' | 'bus' | 'fileSystem'>): string {
-  return [volume.model, busLabel(volume.bus), volume.fileSystem].filter(Boolean).join(' · ');
+export function describeVolume(
+  volume: Pick<LiveVolume, 'model' | 'bus' | 'fileSystem'>,
+  t: Messages,
+): string {
+  return [volume.model, busLabel(volume.bus, t), volume.fileSystem].filter(Boolean).join(' · ');
 }

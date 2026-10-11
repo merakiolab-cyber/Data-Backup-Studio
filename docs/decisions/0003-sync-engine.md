@@ -9,9 +9,12 @@ Robocopy by šlo obalit, ale nedává strukturovaný průběh, náhled plánu an
 ## Rozhodnutí
 Engine v `crates/backup-core`: scan → diff → plán → (náhled) → execute.
 - Porovnání podle velikosti a mtime s tolerancí 2 s; volitelné ověření blake3.
-- Kopie přes dočasný `.dbs-partial` + atomický rename.
+  Existující soubory v cíli se při prvním běhu použijí – záloha z jiného programu se
+  nepřepisuje, pokud velikost a čas sedí.
+- Kopie po 1 MB blocích do dočasného `.dbs-partial` + atomický rename (zrušení i uprostřed souboru).
 - Mazání jen v režimu Zrcadlo, až po kopírování, s pojistkami (prázdný zdroj, práh mazání).
 - Symlinky/junctiony se nenásledují.
+- UX běhu (minimalizace, fronta): [ADR 0010](0010-run-session-ui.md).
 
 ## Důsledky
 - Plná kontrola nad bezpečností a UX (náhled, průběh, zrušení).

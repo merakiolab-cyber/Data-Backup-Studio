@@ -8,17 +8,19 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { HardDrive, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
-import { ease, spin, stagger } from '@/app/theme/motion';
+import { ease, spin } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { Page } from '@/components/Page';
 import { Section } from '@/components/Section';
 import { Stat } from '@/components/Stat';
 import type { LiveVolume } from '@/lib/bindings';
+import { useT } from '@/lib/i18n';
 import { useVolumes } from './api';
 import { AvailableVolumeList } from './components/AvailableVolumeList';
-import { RegisteredVolumeCard } from './components/RegisteredVolumeCard';
+import { RegisteredVolumeGrid } from './components/RegisteredVolumeGrid';
 
 export function VolumesPage() {
+  const { t } = useT();
   const volumes = useVolumes();
   const [refreshing, setRefreshing] = useState(false);
   const refresh = async () => {
@@ -29,12 +31,12 @@ export function VolumesPage() {
 
   return (
     <Page
-      title="Disky"
-      description="Registrované disky poznáme vždy, ať dostanou jakékoli písmeno."
+      title={t.volumes.title}
+      description={t.volumes.description}
       actions={
-        <Tooltip title="Načíst disky znovu">
+        <Tooltip title={t.volumes.refresh}>
           <IconButton
-            aria-label="Načíst disky znovu"
+            aria-label={t.volumes.refresh}
             onClick={refresh}
             disabled={refreshing}
             sx={{
@@ -48,13 +50,13 @@ export function VolumesPage() {
         </Tooltip>
       }
     >
-      {volumes.isPending && <LinearProgress aria-label="Načítám disky" />}
+      {volumes.isPending && <LinearProgress aria-label={t.common.loadingVolumes} />}
       {volumes.isError && (
         <Alert
           severity="error"
           action={
             <Button color="inherit" size="small" onClick={() => volumes.refetch()}>
-              Zkusit znovu
+              {t.common.retry}
             </Button>
           }
         >
@@ -64,28 +66,18 @@ export function VolumesPage() {
       {volumes.data && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <Section
-            title="Cílové disky"
-            aside={<Stat value={volumes.data.registered.length} label="registrované" />}
+            title={t.volumes.targets}
+            {...(volumes.data.registered.length >= 2 ? { subtitle: t.volumes.reorderHint } : {})}
+            aside={<Stat value={volumes.data.registered.length} label={t.volumes.registered} />}
           >
             {volumes.data.registered.length === 0 ? (
               <EmptyState
                 icon={<HardDrive size={32} />}
-                title="Zatím nemáš registrovaný žádný disk"
-                description="Připoj externí USB disk a níže ho zaregistruj. Aplikace si ho zapamatuje podle jeho identity, ne podle písmene."
+                title={t.volumes.emptyTitle}
+                description={t.volumes.emptyDescription}
               />
             ) : (
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-                  gap: 2,
-                  ...stagger(),
-                }}
-              >
-                {volumes.data.registered.map((view) => (
-                  <RegisteredVolumeCard key={view.volume.id} view={view} />
-                ))}
-              </Box>
+              <RegisteredVolumeGrid views={volumes.data.registered} />
             )}
           </Section>
           <AvailableSections volumes={volumes.data.available} />
@@ -96,20 +88,21 @@ export function VolumesPage() {
 }
 
 function AvailableSections({ volumes }: { volumes: LiveVolume[] }) {
+  const { t } = useT();
   const external = volumes.filter((v) => v.isExternal);
   const internal = volumes.filter((v) => !v.isExternal);
 
   return (
     <>
       <Section
-        title="Externí disky"
-        subtitle="Nový USB disk se tu objeví do pár sekund po připojení."
-        aside={<Stat value={external.length} label="připojené" />}
+        title={t.volumes.external}
+        subtitle={t.volumes.externalHint}
+        aside={<Stat value={external.length} label={t.volumes.connected} />}
       >
         {external.length === 0 ? (
           <Card sx={{ px: 3, py: 2.5 }}>
             <Typography variant="body2" color="text.secondary">
-              Žádný neregistrovaný externí disk není připojený.
+              {t.volumes.noExternal}
             </Typography>
           </Card>
         ) : (
@@ -118,9 +111,9 @@ function AvailableSections({ volumes }: { volumes: LiveVolume[] }) {
       </Section>
       {internal.length > 0 && (
         <Section
-          title="Interní disky"
-          subtitle="Jako cíl zálohy jde použít i interní disk, jen ne systémový."
-          aside={<Stat value={internal.length} label="disků" />}
+          title={t.volumes.internal}
+          subtitle={t.volumes.internalHint}
+          aside={<Stat value={internal.length} label={t.volumes.disksUnit} />}
         >
           <AvailableVolumeList volumes={internal} />
         </Section>

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ease } from '@/app/theme/motion';
 import { SplitValue } from '@/components/SplitValue';
 import { formatBytes } from '@/lib/format';
+import { fmt, useT } from '@/lib/i18n';
 
 interface CapacityBarProps {
   totalBytes: number;
@@ -13,6 +14,7 @@ interface CapacityBarProps {
 
 /** Free space as a big split number with a slim bar; meant for pastel cards. */
 export function CapacityBar({ totalBytes, freeBytes }: CapacityBarProps) {
+  const { t } = useT();
   const usedPercent = totalBytes > 0 ? ((totalBytes - freeBytes) / totalBytes) * 100 : 0;
   const nearlyFull = usedPercent >= 90;
   // Start empty and fill right after mount so the bar grows in. A timer, not rAF:
@@ -28,14 +30,14 @@ export function CapacityBar({ totalBytes, freeBytes }: CapacityBarProps) {
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1.5 }}>
         <SplitValue value={formatBytes(freeBytes)} size={36} />
         <Typography variant="body2" sx={{ opacity: 0.7 }}>
-          volno z {formatBytes(totalBytes)}
-          {nearlyFull && ' · skoro plný'}
+          {fmt(t.volumes.freeOf, { total: formatBytes(totalBytes) })}
+          {nearlyFull && ` · ${t.volumes.nearlyFull}`}
         </Typography>
       </Box>
       <LinearProgress
         variant="determinate"
         value={shown}
-        aria-label="Zaplnění disku"
+        aria-label={t.volumes.fillLabel}
         sx={{
           height: 6,
           bgcolor: 'rgba(255, 255, 255, 0.55)',

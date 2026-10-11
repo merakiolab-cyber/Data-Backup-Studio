@@ -1,5 +1,7 @@
 import Box from '@mui/material/Box';
 import { Outlet } from 'react-router';
+import { ActiveRunBar } from '@/features/jobs/components/ActiveRunBar';
+import { RunJobDialog } from '@/features/jobs/components/RunJobDialog';
 import { Sidebar } from './Sidebar';
 
 export function AppShell() {
@@ -9,6 +11,8 @@ export function AppShell() {
       <Box component="main" sx={{ flex: 1, minWidth: 0 }}>
         <Outlet />
       </Box>
+      <RunJobDialog />
+      <ActiveRunBar />
     </Box>
   );
 }

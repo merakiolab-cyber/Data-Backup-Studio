@@ -1,4 +1,10 @@
-import type { BackupMode, JobView, RegisteredVolumeView, VolumeStatus } from '@/lib/bindings';
+import type {
+  BackupMode,
+  JobView,
+  RegisteredVolumeView,
+  RunSummary,
+  VolumeStatus,
+} from '@/lib/bindings';
 
 export interface DiskUsage {
   id: string;
@@ -39,6 +45,31 @@ export function overviewStats(registered: RegisteredVolumeView[], jobs: JobView[
     excludes: jobs.reduce((sum, j) => sum + j.job.excludes.length, 0),
     disks,
   };
+}
+
+export interface BackupStats {
+  runCount: number;
+  bytesCopied: number;
+  last: RunSummary | null;
+}
+
+export function backupStats(runs: RunSummary[]): BackupStats {
+  return {
+    runCount: runs.length,
+    bytesCopied: runs.reduce((sum, run) => sum + run.bytesCopied, 0),
+    last: runs[0] ?? null,
+  };
+}
+
+/** Latest finished run per job (input must already be newest-first). */
+export function latestByJob(runs: RunSummary[]): Map<string, RunSummary> {
+  const latest = new Map<string, RunSummary>();
+  for (const run of runs) {
+    if (!latest.has(run.jobId)) {
+      latest.set(run.jobId, run);
+    }
+  }
+  return latest;
 }
 
 /** Share of used space in 0–1, or `null` when the free space is unknown. */

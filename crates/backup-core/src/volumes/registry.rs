@@ -74,6 +74,28 @@ pub fn rename(
     Ok(())
 }
 
+/// Reorders registered volumes; `ordered_ids` must be a permutation of their ids.
+pub fn reorder(volumes: &mut Vec<RegisteredVolume>, ordered_ids: &[VolumeId]) -> CoreResult<()> {
+    if ordered_ids.len() != volumes.len() {
+        return Err(CoreError::InvalidVolumeOrder);
+    }
+    let mut seen = std::collections::HashSet::with_capacity(ordered_ids.len());
+    let mut reordered = Vec::with_capacity(ordered_ids.len());
+    for id in ordered_ids {
+        if !seen.insert(*id) {
+            return Err(CoreError::InvalidVolumeOrder);
+        }
+        let volume = volumes
+            .iter()
+            .find(|v| v.id == *id)
+            .ok_or(CoreError::InvalidVolumeOrder)?
+            .clone();
+        reordered.push(volume);
+    }
+    *volumes = reordered;
+    Ok(())
+}
+
 pub fn unregister(
     volumes: &mut Vec<RegisteredVolume>,
     id: VolumeId,
@@ -223,6 +245,27 @@ mod tests {
             marker::read(dir.path()).unwrap().map(|m| m.id),
             Some(registered.id)
         );
+    }
+
+    #[test]
+    fn reorder_permutates_registered_list() {
+        let dir_a = tempfile::tempdir().unwrap();
+        let dir_b = tempfile::tempdir().unwrap();
+        let vol_a = mounted_at(&dir_a, 0x1111);
+        let vol_b = mounted_at(&dir_b, 0x2222);
+        let mut volumes = Vec::new();
+        let a = register(&mut volumes, &vol_a, "Disk A").unwrap();
+        let b = register(&mut volumes, &vol_b, "Disk B").unwrap();
+        assert_eq!(volumes[0].id, a.id);
+
+        reorder(&mut volumes, &[b.id, a.id]).unwrap();
+        assert_eq!(volumes[0].id, b.id);
+        assert_eq!(volumes[1].id, a.id);
+
+        assert!(matches!(
+            reorder(&mut volumes, &[a.id]),
+            Err(CoreError::InvalidVolumeOrder)
+        ));
     }
 
     #[test]

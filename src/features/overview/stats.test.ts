@@ -1,5 +1,6 @@
-import type { JobView, RegisteredVolumeView } from '@/lib/bindings';
-import { overviewStats, usedRatio } from './stats';
+import type { JobView, RegisteredVolumeView, RunSummary } from '@/lib/bindings';
+import { freshnessLevel, jobFreshnessRows } from './freshness';
+import { backupStats, latestByJob, overviewStats, usedRatio } from './stats';
 
 const TB = 1024 ** 4;
 
@@ -83,5 +84,66 @@ describe('overviewStats', () => {
     );
     expect(stats.freeBytes).toBeNull();
     expect(stats.modes).toEqual({ update: 0, mirror: 0 });
+  });
+});
+
+function run(jobId: string, bytesCopied: number): RunSummary {
+  return {
+    id: `d4d4d4d4-0000-4000-8000-${jobId.slice(-12)}`,
+    jobId,
+    jobName: jobId,
+    mode: 'mirror',
+    status: 'done',
+    startedAtMs: 1,
+    finishedAtMs: 2,
+    copied: 1,
+    updated: 0,
+    deleted: 0,
+    dirsCreated: 0,
+    bytesCopied,
+    errorCount: 0,
+  };
+}
+
+describe('freshness', () => {
+  const now = 1_700_000_000_000;
+
+  it('classifies age and lists recent run dots', () => {
+    expect(freshnessLevel(null, now)).toBe('never');
+    expect(
+      freshnessLevel({ ...run('a', 0), finishedAtMs: now - 2 * 86_400_000, status: 'done' }, now),
+    ).toBe('fresh');
+    expect(
+      freshnessLevel({ ...run('a', 0), finishedAtMs: now - 10 * 86_400_000, status: 'done' }, now),
+    ).toBe('aging');
+    expect(
+      freshnessLevel({ ...run('a', 0), finishedAtMs: now - 40 * 86_400_000, status: 'done' }, now),
+    ).toBe('stale');
+
+    const view = job('mirror', []);
+    const id = view.job.id;
+    const rows = jobFreshnessRows(
+      [view],
+      [
+        { ...run(id, 100), finishedAtMs: now - 86_400_000 },
+        { ...run(id, 50), finishedAtMs: now - 2 * 86_400_000 },
+      ],
+      now,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.level).toBe('fresh');
+    expect(rows[0]?.recentRuns.map((dot) => dot.status)).toEqual(['done', 'done']);
+  });
+});
+
+describe('backupStats', () => {
+  it('takes the newest run as last and sums copied bytes', () => {
+    const newer = run('c3c3c3c3-0000-4000-8000-000000000001', 100);
+    const older = run('c3c3c3c3-0000-4000-8000-000000000002', 50);
+    const stats = backupStats([newer, older]);
+    expect(stats.runCount).toBe(2);
+    expect(stats.bytesCopied).toBe(150);
+    expect(stats.last).toBe(newer);
+    expect(latestByJob([newer, older]).get(newer.jobId)).toBe(newer);
   });
 });

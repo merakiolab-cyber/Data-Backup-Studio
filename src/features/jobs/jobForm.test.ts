@@ -30,7 +30,7 @@ describe('jobForm', () => {
       name: 'Fotky',
       source: folder.source,
       target: { volumeId: ready.targetVolumeId, relPath: 'Záloha\\Fotky' },
-      mode: 'update',
+      mode: 'mirror',
       excludes: [],
     });
     expect(toInput({ ...ready, targetRelPath: ' \\ ' })).toBeNull();

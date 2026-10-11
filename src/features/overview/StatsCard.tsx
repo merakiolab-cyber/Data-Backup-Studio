@@ -8,13 +8,15 @@ import type { DesignTokens } from '@/app/theme/tokens';
 import { IconBubble } from '@/components/IconBubble';
 import { SplitValue } from '@/components/SplitValue';
 import { formatBytes } from '@/lib/format';
-import { type DiskUsage, type OverviewStats, usedRatio } from './stats';
+import { fmt, useT } from '@/lib/i18n';
+import { type BackupStats, type DiskUsage, type OverviewStats, usedRatio } from './stats';
 
-export function StatsCard({ stats }: { stats: OverviewStats }) {
+export function StatsCard({ stats, backups }: { stats: OverviewStats; backups: BackupStats }) {
+  const { t } = useT();
   return (
     <Box
       component="article"
-      aria-label="Statistiky"
+      aria-label={t.overview.stats}
       sx={(theme) => ({
         p: 3,
         borderRadius: '28px',
@@ -28,7 +30,7 @@ export function StatsCard({ stats }: { stats: OverviewStats }) {
           <ChartNoAxesColumn size={20} />
         </IconBubble>
         <Typography variant="h3" component="h3">
-          Statistiky
+          {t.overview.stats}
         </Typography>
       </Box>
 
@@ -48,32 +50,42 @@ export function StatsCard({ stats }: { stats: OverviewStats }) {
             ...stagger(60),
           }}
         >
-          <Metric label="Kapacita cílových disků">
+          <Metric label={t.overview.capacity}>
             <SplitValue value={formatBytes(stats.totalBytes)} size={32} animate />
           </Metric>
-          <Metric label="Volno na připojených">
+          <Metric label={t.overview.freeConnected}>
             <SplitValue
               value={stats.freeBytes === null ? '—' : formatBytes(stats.freeBytes)}
               size={32}
               animate
             />
           </Metric>
-          <Metric label="Úlohy podle režimu">
+          <Metric label={t.overview.jobsByMode}>
             <ModeCount
               icon={<FilePlus2 size={16} />}
               count={stats.modes.update}
-              label="Aktualizace"
+              label={t.mode.update}
             />
-            <ModeCount icon={<CopyCheck size={16} />} count={stats.modes.mirror} label="Zrcadlo" />
+            <ModeCount
+              icon={<CopyCheck size={16} />}
+              count={stats.modes.mirror}
+              label={t.mode.mirror}
+            />
           </Metric>
-          <Metric label="Vzory vyloučení">
+          <Metric label={t.overview.excludes}>
             <SplitValue value={String(stats.excludes)} size={32} animate />
+          </Metric>
+          <Metric label={t.overview.backupsInHistory}>
+            <SplitValue value={String(backups.runCount)} size={32} animate />
+          </Metric>
+          <Metric label={t.overview.copiedTotal}>
+            <SplitValue value={formatBytes(backups.bytesCopied)} size={32} animate />
           </Metric>
         </Box>
 
         <Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Zaplnění cílových disků
+            {t.overview.diskFill}
           </Typography>
           {stats.disks.length > 0 ? (
             <Box component="ul" sx={{ m: 0, p: 0, display: 'grid', gap: 2, ...stagger(60) }}>
@@ -83,7 +95,7 @@ export function StatsCard({ stats }: { stats: OverviewStats }) {
             </Box>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Zatím žádný registrovaný disk.
+              {t.overview.noDisks}
             </Typography>
           )}
         </Box>
@@ -125,6 +137,7 @@ function barTone(ratio: number): keyof Pick<DesignTokens, 'mint' | 'lemon' | 'pe
 }
 
 function DiskRow({ disk }: { disk: DiskUsage }) {
+  const { t } = useT();
   const ratio = usedRatio(disk);
   // A timer, not rAF: rAF pauses in hidden windows and the bar would stay empty.
   const [shown, setShown] = useState(0);
@@ -135,8 +148,8 @@ function DiskRow({ disk }: { disk: DiskUsage }) {
 
   const detail =
     ratio === null
-      ? `${disk.state === 'disconnected' ? 'nepřipojený' : 'potřebuje ověřit'} · ${formatBytes(disk.totalBytes)}`
-      : `${Math.round(ratio * 100)} % · volno ${formatBytes(disk.freeBytes ?? 0)} z ${formatBytes(disk.totalBytes)}`;
+      ? `${disk.state === 'disconnected' ? t.overview.disconnected : t.overview.needsCheck} · ${formatBytes(disk.totalBytes)}`
+      : `${Math.round(ratio * 100)} % · ${fmt(t.overview.freeOf, { free: formatBytes(disk.freeBytes ?? 0), total: formatBytes(disk.totalBytes) })}`;
 
   return (
     <Box component="li" sx={{ listStyle: 'none' }}>
@@ -150,7 +163,7 @@ function DiskRow({ disk }: { disk: DiskUsage }) {
       </Box>
       <Box
         role="meter"
-        aria-label={`Zaplnění disku ${disk.name}`}
+        aria-label={fmt(t.overview.diskFillOf, { name: disk.name })}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={ratio === null ? undefined : Math.round(ratio * 100)}

@@ -7,6 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import { type FormEvent, type ReactNode, useState } from 'react';
+import { useT } from '@/lib/i18n';
 
 const MAX_NAME_LENGTH = 64;
 
@@ -40,6 +41,7 @@ function VolumeNameForm({
   onSubmit,
   onClose,
 }: VolumeNameDialogProps) {
+  const { t } = useT();
   const [name, setName] = useState(initialName);
   const trimmed = name.trim();
   const valid = trimmed.length > 0 && trimmed.length <= MAX_NAME_LENGTH;
@@ -59,11 +61,11 @@ function VolumeNameForm({
         <TextField
           autoFocus
           fullWidth
-          label="Název disku"
+          label={t.volumes.volumeName}
           value={name}
           onChange={(event) => setName(event.target.value)}
           error={name.length > 0 && !valid}
-          helperText={`${trimmed.length}/${MAX_NAME_LENGTH} znaků`}
+          helperText={`${trimmed.length}/${MAX_NAME_LENGTH} ${t.common.characters}`}
           slotProps={{ htmlInput: { maxLength: MAX_NAME_LENGTH + 10 } }}
         />
         {error && (
@@ -73,7 +75,7 @@ function VolumeNameForm({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Zrušit</Button>
+        <Button onClick={onClose}>{t.common.cancel}</Button>
         <Button type="submit" variant="contained" disabled={!valid} loading={pending}>
           {submitLabel}
         </Button>

@@ -5,13 +5,14 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import { Ellipsis, HardDrive, Pencil, ShieldCheck, Trash2 } from 'lucide-react';
+import { Ellipsis, GripVertical, HardDrive, Pencil, ShieldCheck, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { hoverLift } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { RegisteredVolumeView } from '@/lib/bindings';
 import { formatBytes } from '@/lib/format';
+import { fmt, useT } from '@/lib/i18n';
 import { useConfirmVolume, useRenameVolume, useUnregisterVolume } from '../api';
 import { confirmReasonText, describeVolume } from '../labels';
 import { CapacityBar } from './CapacityBar';
@@ -21,7 +22,14 @@ import { VolumeStatusChip } from './VolumeStatusChip';
 
 type OpenDialog = 'rename' | 'remove' | null;
 
-export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
+export function RegisteredVolumeCard({
+  view,
+  showDragHandle = false,
+}: {
+  view: RegisteredVolumeView;
+  showDragHandle?: boolean;
+}) {
+  const { t } = useT();
   const { volume, status, live } = view;
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [dialog, setDialog] = useState<OpenDialog>(null);
@@ -64,13 +72,27 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {showDragHandle && (
+          <Box
+            component="span"
+            aria-hidden
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              opacity: 0.45,
+              mr: -0.5,
+            }}
+          >
+            <GripVertical size={18} />
+          </Box>
+        )}
         <IconBubble tone={onAccent ? 'glass' : 'muted'}>
           <HardDrive size={22} />
         </IconBubble>
         <Box sx={{ flex: 1 }} />
         <VolumeStatusChip status={status} mountPoint={live?.mountPoint} />
         <IconButton
-          aria-label={`Možnosti disku ${volume.name}`}
+          aria-label={fmt(t.volumes.options, { name: volume.name })}
           onClick={(event) => setMenuAnchor(event.currentTarget)}
           sx={
             onAccent
@@ -94,6 +116,7 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
         <Typography variant="body2" noWrap sx={{ opacity: 0.7 }}>
           {describeVolume(
             live ?? { model: volume.model, bus: 'unknown', fileSystem: volume.fileSystem },
+            t,
           )}
         </Typography>
       </Box>
@@ -104,13 +127,13 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
         )}
         {status.state === 'disconnected' && (
           <Typography variant="body2" color="text.secondary">
-            Kapacita {formatBytes(volume.totalBytes)}. Připoj disk a ukáže se jeho aktuální písmeno.
+            {fmt(t.volumes.capacityOff, { bytes: formatBytes(volume.totalBytes) })}
           </Typography>
         )}
         {status.state === 'needsConfirmation' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
             <Typography variant="body2" sx={{ opacity: 0.85 }}>
-              {confirm.error?.message ?? confirmReasonText[status.reason]}
+              {confirm.error?.message ?? confirmReasonText(t)[status.reason]}
             </Typography>
             {status.reason !== 'duplicate' && (
               <Button
@@ -124,7 +147,7 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
                   color: ds(theme).onAccentButton,
                 })}
               >
-                Potvrdit disk
+                {t.volumes.confirm}
               </Button>
             )}
           </Box>
@@ -136,22 +159,22 @@ export function RegisteredVolumeCard({ view }: { view: RegisteredVolumeView }) {
           <ListItemIcon>
             <Pencil size={18} />
           </ListItemIcon>
-          Přejmenovat
+          {t.volumes.rename}
         </MenuItem>
         <MenuItem onClick={() => openDialog('remove')}>
           <ListItemIcon>
             <Trash2 size={18} />
           </ListItemIcon>
-          Odebrat z aplikace
+          {t.volumes.remove}
         </MenuItem>
       </Menu>
 
       <VolumeNameDialog
         open={dialog === 'rename'}
-        title="Přejmenovat disk"
-        description="Název uvidíš v úlohách a v historii záloh."
+        title={t.volumes.renameTitle}
+        description={t.volumes.renameHint}
         initialName={volume.name}
-        submitLabel="Uložit"
+        submitLabel={t.common.save}
         pending={rename.isPending}
         error={rename.error}
         onSubmit={(name) =>

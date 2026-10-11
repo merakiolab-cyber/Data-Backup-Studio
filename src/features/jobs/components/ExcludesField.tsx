@@ -4,6 +4,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { Plus } from 'lucide-react';
 import { type KeyboardEvent, useState } from 'react';
+import { useT } from '@/lib/i18n';
 import { suggestedExcludes } from '../labels';
 
 export function ExcludesField({
@@ -13,6 +14,7 @@ export function ExcludesField({
   value: string[];
   onChange: (excludes: string[]) => void;
 }) {
+  const { t } = useT();
   const [draft, setDraft] = useState('');
   const add = (pattern: string) => {
     const trimmed = pattern.trim();
@@ -35,8 +37,8 @@ export function ExcludesField({
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
         fullWidth
-        label="Přidat vzor"
-        placeholder="např. *.tmp nebo **/Cache/**"
+        label={t.editor.addPattern}
+        placeholder={t.editor.patternPlaceholder}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={handleKeyDown}
@@ -44,7 +46,7 @@ export function ExcludesField({
           add(draft);
           setDraft('');
         }}
-        helperText="Enter přidá vzor. * = cokoli v názvu, ** = libovolné podsložky."
+        helperText={t.editor.patternHelp}
       />
       {value.length > 0 && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -61,7 +63,7 @@ export function ExcludesField({
       {suggestions.length > 0 && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
-            Časté:
+            {t.editor.commonPatterns}
           </Typography>
           {suggestions.map((pattern) => (
             <Chip

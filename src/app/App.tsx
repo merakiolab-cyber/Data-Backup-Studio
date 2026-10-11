@@ -2,6 +2,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router';
+import { RunSessionProvider } from '@/features/jobs/runSession';
+import { I18nProvider } from '@/lib/i18n';
 import { router } from './router';
 import { theme } from './theme/theme';
 
@@ -16,7 +18,11 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme} defaultMode="system">
         <CssBaseline enableColorScheme />
-        <RouterProvider router={router} />
+        <I18nProvider>
+          <RunSessionProvider>
+            <RouterProvider router={router} />
+          </RunSessionProvider>
+        </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

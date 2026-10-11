@@ -10,11 +10,13 @@ import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
 import type { LiveVolume } from '@/lib/bindings';
 import { driveLabel, formatBytes } from '@/lib/format';
+import { fmt, useT } from '@/lib/i18n';
 import { useRegisterVolume } from '../api';
 import { describeVolume, suggestName } from '../labels';
 import { VolumeNameDialog } from './VolumeNameDialog';
 
 export function AvailableVolumeList({ volumes }: { volumes: LiveVolume[] }) {
+  const { t } = useT();
   const [selected, setSelected] = useState<LiveVolume | null>(null);
   const register = useRegisterVolume();
 
@@ -36,15 +38,10 @@ export function AvailableVolumeList({ volumes }: { volumes: LiveVolume[] }) {
       </Box>
       <VolumeNameDialog
         open={selected !== null}
-        title="Registrovat disk"
-        description={
-          <>
-            Pojmenuj disk tak, abys ho poznal. Do kořene disku se zapíše skrytá složka{' '}
-            <code>.databackupstudio</code>, podle které ho aplikace pozná pod jakýmkoli písmenem.
-          </>
-        }
+        title={t.volumes.registerTitle}
+        description={t.volumes.registerHint}
         initialName={selected ? suggestName(selected) : ''}
-        submitLabel="Registrovat"
+        submitLabel={t.volumes.register}
         pending={register.isPending}
         error={register.error}
         onSubmit={(name) =>
@@ -67,6 +64,7 @@ function AvailableVolumeRow({
   volume: LiveVolume;
   onRegister: () => void;
 }) {
+  const { t } = useT();
   const Icon = volume.isSystem ? Monitor : volume.isExternal ? Usb : HardDrive;
 
   return (
@@ -85,27 +83,27 @@ function AvailableVolumeRow({
       </IconBubble>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="subtitle1" noWrap>
-          {driveLabel(volume.mountPoint)} {volume.label || 'Bez jmenovky'}
+          {driveLabel(volume.mountPoint)} {volume.label || t.volumes.unlabeled}
         </Typography>
         <Typography variant="body2" color="text.secondary" noWrap>
-          {describeVolume(volume)}
+          {describeVolume(volume, t)}
         </Typography>
       </Box>
       <Box sx={{ textAlign: 'right', mr: 1, display: { xs: 'none', md: 'block' } }}>
         <Typography variant="subtitle1">{formatBytes(volume.freeBytes)}</Typography>
         <Typography variant="caption" color="text.secondary">
-          volno z {formatBytes(volume.totalBytes)}
+          {fmt(t.volumes.freeOf, { total: formatBytes(volume.totalBytes) })}
         </Typography>
       </Box>
       {volume.isSystem ? (
-        <Chip label="Systémový disk" variant="outlined" />
+        <Chip label={t.volumes.system} variant="outlined" />
       ) : (
         <Button
           variant={volume.isExternal ? 'contained' : 'outlined'}
           startIcon={<Plus size={18} />}
           onClick={onRegister}
         >
-          Registrovat
+          {t.volumes.register}
         </Button>
       )}
     </Card>

@@ -10,7 +10,8 @@ disků na externí USB disky. Alternativa ke Cobian Reflectoru, která řeší m
 
 ## Stack
 Tauri 2 · Rust (`crates/backup-core` = logika, `src-tauri` = tenký shell) · React 19 + TS strict +
-Vite · MUI (Material 3 téma) · TanStack Query + Zustand · tauri-specta · Biome · pnpm.
+Vite · MUI (Material 3 téma) · TanStack Query · `RunSessionProvider` (běh zálohy) · tauri-specta ·
+Biome · pnpm. UI cs/en (ADR 0009).
 
 ## Příkazy
 | Účel | Příkaz |

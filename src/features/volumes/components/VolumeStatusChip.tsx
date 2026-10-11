@@ -4,6 +4,7 @@ import { ease, pulseRing } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { VolumeStatus } from '@/lib/bindings';
 import { driveLabel } from '@/lib/format';
+import { fmt, useT } from '@/lib/i18n';
 
 interface VolumeStatusChipProps {
   status: VolumeStatus;
@@ -12,15 +13,18 @@ interface VolumeStatusChipProps {
 
 /** Status pill: always icon + text, never color alone. */
 export function VolumeStatusChip({ status, mountPoint }: VolumeStatusChipProps) {
+  const { t } = useT();
   const { icon, label } =
     status.state === 'connected'
       ? {
           icon: <CircleCheck size={16} />,
-          label: mountPoint ? `Připojený jako ${driveLabel(mountPoint)}` : 'Připojený',
+          label: mountPoint
+            ? fmt(t.volumes.connectedAs, { letter: driveLabel(mountPoint) })
+            : t.volumes.connectedPlain,
         }
       : status.state === 'needsConfirmation'
-        ? { icon: <CircleAlert size={16} />, label: 'Potřebuje ověřit' }
-        : { icon: <Unplug size={16} />, label: 'Nepřipojený' };
+        ? { icon: <CircleAlert size={16} />, label: t.volumes.needsCheck }
+        : { icon: <Unplug size={16} />, label: t.volumes.disconnected };
   const onAccent = status.state !== 'disconnected';
 
   return (

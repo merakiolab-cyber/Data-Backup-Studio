@@ -3,6 +3,7 @@
 //! This crate has no dependency on Tauri so it can be tested in isolation.
 
 pub mod domain;
+pub mod engine;
 pub mod error;
 pub mod jobs;
 pub mod storage;

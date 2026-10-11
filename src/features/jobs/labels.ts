@@ -1,16 +1,14 @@
-import type { BackupMode } from '@/lib/bindings';
+import type { BackupMode, JobView } from '@/lib/bindings';
+import type { Messages } from '@/lib/i18n';
 
-export const modeLabels: Record<BackupMode, { title: string; description: string }> = {
-  mirror: {
-    title: 'Zrcadlo',
-    description:
-      'Záloha bude přesná kopie zdroje. Co ve zdroji smažeš, smaže se při příští záloze i v cíli.',
-  },
-  update: {
-    title: 'Aktualizace',
-    description: 'Kopíruje jen nové a změněné soubory. V záloze se nikdy nic nesmaže.',
-  },
-};
+export function modeLabels(
+  t: Messages,
+): Record<BackupMode, { title: string; description: string }> {
+  return {
+    mirror: { title: t.mode.mirror, description: t.mode.mirrorHint },
+    update: { title: t.mode.update, description: t.mode.updateHint },
+  };
+}
 
 /** Common junk worth skipping, offered as one-click chips in the editor. */
 export const suggestedExcludes = [
@@ -21,12 +19,9 @@ export const suggestedExcludes = [
   'desktop.ini',
 ] as const;
 
-/** Czech plural after a count: 1 úloha, 2 úlohy, 5 úloh. */
-export function jobsLabel(count: number): string {
-  if (count === 1) {
-    return 'úloha';
-  }
-  return count >= 2 && count <= 4 ? 'úlohy' : 'úloh';
+/** Source and target disks are connected – the job can run. */
+export function isJobReady(view: JobView): boolean {
+  return view.source.status.state === 'connected' && view.target.status.state === 'connected';
 }
 
 /** Last folder name of a relative path, e.g. `Fotky` for `Dokumenty\Fotky`. */
@@ -37,4 +32,9 @@ export function leafName(relPath: string): string {
 /** `D:\Fotky` while connected, otherwise `\Fotky` (the volume name is shown next to it). */
 export function displayLocation(relPath: string, path: string | null): string {
   return path ?? `\\${relPath}`;
+}
+
+/** Source files already on the target with matching size and mtime — Mirror and Update skip them. */
+export function unchangedFiles(sourceFiles: number, copy: number, update: number): number {
+  return Math.max(0, sourceFiles - copy - update);
 }

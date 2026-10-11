@@ -1,5 +1,6 @@
 import type {
   BackupMode,
+  JobGroupId,
   JobInput,
   JobView,
   LocatedFolder,
@@ -25,6 +26,8 @@ export interface JobForm {
   targetRelPath: string;
   mode: BackupMode;
   excludes: string[];
+  /** `null` = listed under Ungrouped. Not part of `JobInput`. */
+  groupId: JobGroupId | null;
 }
 
 export const MAX_NAME_LENGTH = 64;
@@ -36,8 +39,9 @@ export function emptyForm(): JobForm {
     source: null,
     targetVolumeId: null,
     targetRelPath: '',
-    mode: 'update',
+    mode: 'mirror',
     excludes: [],
+    groupId: null,
   };
 }
 
@@ -55,6 +59,7 @@ export function formFromJob({ job, source }: JobView): JobForm {
     targetRelPath: job.target.relPath,
     mode: job.mode,
     excludes: job.excludes,
+    groupId: job.groupId ?? null,
   };
 }
 

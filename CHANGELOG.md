@@ -5,12 +5,117 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Další krok
+- **Fáze 7 před zveřejněním:** audit historie gitu na osobní data; ověřit commit e-mail;
+  GitHub release s instalátorem a checksumy (`releases/` zůstává mimo git).
+- Volitelně později: `WM_DEVICECHANGE` místo pollingu disků (fáze 2).
+
+## [1.0.0] – 2026-10-11
+
+První stabilní release po ostrém testu na skutečných discích.
+
+### Bezpečnost
+- Import konfigurace teď prochází stejnou validací úloh jako editor (cíl nesmí být kořen
+  disku, překryvy, vzory). Otevření složky normalizuje `rel_path` na backendu.
+
+### Odstraněno
+- Nepoužívané ikony z generátoru (`64x64.png`, `icon.png`) a mrtvé konstanty enginu
+  (výchozí hodnoty teď žijí jen v `AppSettings`). Smazaný Vite `dist/` (mimo git).
+
+### Opraveno
+- **Přetahování úloh** ve Windows aplikaci. WebView2 jinak nativní drop sebere dřív, než
+  ho dostane stránka (`dragDropEnabled: false`). V prohlížeči to fungovalo i předtím.
+- **Zrušení běhu** zastaví i probíhající kopii velkého souboru (kopírování po 1 MB blocích
+  s kontrolou zrušení). Dříve `fs::copy` doběhlo celý soubor.
+
+### Přidáno
+- **CI (GitHub Actions)** na Windows: `pnpm check`, Vitest, `cargo test --workspace`; po pushi na
+  `main`/`master` navíc sestavení Tauri (NSIS + portable exe jako artefakty).
+- Anglický **`README.en.md`** pro portfolio na GitHubu.
+- **Historie – detail běhu:** tlačítko **Zobrazit ve složce** otevře soubor záznamu (`logs\{id}.log`)
+  v Průzkumníku se souborem vybraným.
+- Na stránce **Disky** jde **přetahováním karet** změnit pořadí registrovaných cílových disků
+  (ukládá se do konfigurace).
+- Na **Přehledu** tabulka **Stáří záloh** – u každé úlohy cílový disk, čas posledního běhu,
+  barevné stáří (nedávno / dní / starší / nikdy / chyba) a tečky posledních běhů.
+- Na stránce **Úlohy** jde označené úlohy **seskupit** (např. podle jména záložního disku).
+  Skupiny jdou přejmenovat, zrušit a sbalit/rozbalit. Konfigurace schéma v4. ADR 0011.
+- Běh zálohy jde **minimalizovat** – aplikaci můžeš dál používat, dole zůstane lišta s průběhem.
+  Další úlohy se dají přidat do fronty (jedna po druhé, ne současně na disk). ADR 0010.
+
+### Změněno
+- **Detail běhu v Historii** – větší dialog (až ~1280×880 px), na širokém okně souhrn vlevo
+  a celoplošný textový záznam vpravo; větší písmo logu pro 4K; filtry typů akcí v logu
+  (přidáno, aktualizováno, smazáno, složky, selhání).
+- **Responzivní mřížky karet** – obsah stránek na celou šířku okna; sloupce 1–4 podle šířky
+  (Úlohy, Disky, Přehled, volba režimu).
+- Sidebar má **tučné geometrické logo** (vrstvené D, silný zaoblený tah) bez kruhu.
+- **Úlohy – výběr a karty.** Klik na dlaždici ji označí (lehce nazelenalé pozadí, bez checkboxu).
+  Jde vybrat celou skupinu i všechny úlohy najednou. Počet úloh ve skupině je vpravo u menu.
+  Karty jsou vzdušnější; skupiny se sbalují plynule. Zelené „Spustit vše“ je v záhlaví Úloh i Přehledu.
+  Dlaždice poslední zálohy na Přehledu je zase růžová (peach).
+  Úlohu přesuneš přetažením na skupinu,
+  volbou „Přesunout do“, nebo skupinou v detailu úlohy.
+- **Zrcadlo bere existující zálohu.** Soubory, které už v cíli sedí (stejná velikost a čas),
+  se při prvním běhu nekopírují znovu – i když je dřív zapsal jiný program. Náhled ukáže,
+  kolik se jich ponechá. Plná kopie je jen do prázdné složky. Vysvětlivka u režimu to
+  říká přímo. Režim Aktualizace pořád nic nemaže; na převzetí staré zálohy použij Zrcadlo
+  a před spuštěním zkontroluj náhled.
+- Odebraný nepoužívaný Zustand. Seznam úloh se nepolluje zvlášť – obnoví se s disky
+  (4 s, jen aktivní okno). Enumerace svazků se na ~1,2 s sdílí mezi Přehledem a Úlohami.
+
+### Přidáno – jazyk
+- V Nastavení jde přepnout **jazyk aplikace** (Čeština / English). Volba je v `config.json`
+  a v exportu; okamžitě se projeví v celém UI. Chybějící hodnota ve starším souboru = čeština.
+  Chyby z backendu (alert, dialog) jsou ve zvoleném jazyce. Textové logy běhů zůstávají česky.
+  ADR 0009.
+
+### Přidáno – dotažení produktu
+- Na Přehledu je **Spustit vše** (připravené úlohy postupně). Bez registrovaného disku výzva na Disky.
+- Na kartě úlohy jde **otevřít zdroj/cíl v Průzkumníku** a zkopírovat cestu. V Nastavení **Otevřít**
+  složku dat a logů. Cestu skládá backend z `Location`, frontend ji neposílá.
+- LICENSE (MIT) a README pro běžné použití (jak začít, kde leží data).
+
+### Přidáno – nastavení (fáze 6)
+- V Nastavení jde zvolit **souběžné kopie** (1–8), **toleranci času souboru**, **práh mazání**
+  Zrcadla a volitelné **ověření kopií** (blake3 po zápisu, před přejmenováním). Hodnoty jsou
+  v `config.json` (schéma v3). Export/import konfigurace (bez historie).
+- Engine kopíruje soubory paralelně podle nastavení; mazání v Zrcadle pořád až po kopiích.
+- Náhled Přehledu v README (`assets/abckup-preview.png`). ADR 0007, 0008.
+
+### Přidáno – logy a průběh
+- Každý běh má textový záznam v `%APPDATA%\…\logs\{id}.log` (relativní cesty). Starší soubory
+  se mažou, zůstává 80 nejnovějších. Záznam je v detailu Historie; cesta ke složce v Nastavení.
+- V dialogu běhu je **rychlost** a **ETA** (průměr od začátku, po krátkém náběhu).
+
+### Přidáno – historie běhů (fáze 5)
+- Každá záloha se zapíše do `history.db` v `%APPDATA%` (souhrn + chyby). Obrazovka **Historie**
+  ukáže seznam, filtr podle úlohy a detail chyb. Selhané běhy mají odznak v menu.
+- Dlaždice **Poslední záloha** na Přehledu, na kartě Statistiky počet záloh a zkopírovaný objem,
+  na kartě úlohy poslední výsledek a čas.
+- Příkazy `list_runs` / `get_run`. Závislost `rusqlite` (bundled). ADR 0006.
+
+### Přidáno – hromadné spuštění
+- Na stránce Úlohy jde karty **označit** (i všechny najednou). Tlačítko **Spustit vše** /
+  **Spustit označené** pustí připravené úlohy postupně; každá má náhled a potvrzení. Úlohy
+  bez připojeného disku se přeskočí.
+
+### Přidáno – engine (fáze 4)
+- **Spouštění zálohy**: tlačítko Spustit na kartě úlohy otevře náhled plánu (co se zkopíruje /
+  aktualizuje / smaže), pak běh s průběhem a možností zrušit.
+- Režim **Zrcadlo** je výchozí – první běh udělá plnou kopii, další udržují přesný otisk zdroje
+  (včetně smazaných souborů v cíli). Aktualizace zůstává jako volitelný režim bez mazání.
+- Jádro `engine/`: preflight, scan (`jwalk` + excludes), diff, execute (`.dbs-partial` + rename +
+  mtime), pojistky (prázdný zdroj nic nesmaže, práh mazání 20 % vyžaduje potvrzení).
+- Příkazy `preview_job` / `run_job` / `cancel_run`, událost `run-progress`. Závislosti `jwalk`,
+  `filetime`. Integrační testy: otisk Zrcadla, Update nemaže, prázdný zdroj, zrušení, excludes.
+
 ### Přidáno – úlohy (fáze 3)
 - **Zálohovací úlohy**: editor (`#/ulohy/nova`, `#/ulohy/:id`) v pěti krocích – zdroj přes systémový
   dialog, cílový disk + složka (s výběrem existující složky), režim Aktualizace/Zrcadlo, vzory vyloučení
   (s častými návrhy) a název (předvyplní se podle složky).
 - Karty úloh (stránka Úlohy): zdroj → cíl s aktuální cestou (`D:\Fotky` → `G:\Záloha\Fotky`), stav
-  „Připraveno“ / „Disk nepřipojený“ / „Disk potřebuje ověřit“, úprava a smazání. „Spustit“ je zatím neaktivní (fáze 4).
+  „Připraveno“ / „Disk nepřipojený“ / „Disk potřebuje ověřit“, úprava a smazání.
 - Jádro: `Location` + normalizace relativních cest, `Job`/`JobSpec` s validací, modul `jobs`
   (`locate`, create/update/delete, `JobView`), zdrojové disky bez značky (`SourceVolume`, GUID → sériové číslo).
 - Pojistky: cíl nesmí být kořen disku ani `.databackupstudio`, zdroj a cíl se nesmí překrývat,
@@ -37,6 +142,7 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
   vše vypne.
 
 ### Změněno
+- Počet úloh je u nadpisu sekce jako „Zálohovací úlohy (3)“, ne jako samostatné číslo vpravo.
 - Jemnější stíny karet.
 - **Nový vzhled** (ADR 0004): pastelový „soft“ styl místo čistého Material 3 – přechod mint → levandule,
   velký bílý list s kartami, sidebar s kulatými ikonovými odkazy a badge, pastelové karty disků podle stavu,
@@ -69,17 +175,20 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Pravidlo a fáze 7 roadmapy pro budoucí zveřejnění repa na GitHubu bez osobních dat.
 - Základ repozitáře: architektura, roadmapa, UI/UX zásady, ADR 0001–0003, Cursor rules a skills.
 
+### Přidáno – instalátor
+- NSIS instalátor s offline WebView2 a portable `data-backup-studio.exe` v `releases/1.0.0/`
+  (mimo git, ~210 MB kvůli přibalenému WebView2). Jazyky instalátoru: čeština a English.
+
 ### Poznámky
 - Vite dev server běží na portu **1427** (1420 obsazuje jiný projekt).
 - Aplikace spuštěná AI agentem běží v izolovaném prostředí a okno není vidět – vizuální kontrolu
   dělá uživatel přes `pnpm tauri dev`, nebo agent headless snímky demo režimu (`pnpm dev` na jiném portu).
 - Ruční test fáze 2 se skutečnými USB disky uživatel potvrdil (registrace funguje).
-- **Stav 2026-10-11:** fáze 0–2 hotové, fáze 3 hotová v kódu (chybí jen ruční test).
-  Vzhled: pastelový soft styl, jemné stíny, mikroanimace (`motion.ts`). Přehled = dlaždice + karta
-  Statistiky, úlohy mají vlastní stránku `#/ulohy`. Testy: 47 v jádře, 15 ve frontendu; `pnpm check` čistý.
-  Headless snímky občas zachytí nástupovou animaci (čísla na 0, karta průsvitná) – v okně aplikace
-  je konečný stav v pořádku. Náhledový Vite pro snímky patří na port 1430 a po práci se zastavuje.
-
-### Další krok
-- Ruční test fáze 3 se skutečnými disky (vytvořit úlohu, přepojit USB, zkontrolovat cestu na kartě).
-- Fáze 4 – engine: scan, plán (dry-run náhled), kopírování s pojistkami Zrcadla, průběh.
+- **Stav 2026-10-11 (večer) – shrnutí dnešní práce:**
+  - Jazyk UI cs/en + lokalizované chyby backendu (ADR 0009).
+  - Audit bezpečnosti/efektivity: validace importu, cache enumerace svazků, odebrán Zustand.
+  - NSIS + portable v `releases/0.1.0/` (mimo git); oficiální v1.0 až po ostrém testu.
+  - Úklid repa (ikony, mrtvé konstanty, `dist/`, `.gitignore` pro `src-tauri/gen/`).
+  - Zrcadlo přebírá existující zálohu (např. `E:\Photos` → `H:\Photos` bez kopie od nuly).
+  - Zrušení uprostřed velkého souboru; minimalizace běhu + fronta úloh (ADR 0010).
+  - Fáze 0–6 hotové. Data jen v `%APPDATA%\app.databackupstudio\`.

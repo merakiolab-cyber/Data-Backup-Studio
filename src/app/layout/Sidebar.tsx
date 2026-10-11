@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import Tooltip from '@mui/material/Tooltip';
 import {
-  DatabaseBackup,
   FolderSync,
   HardDrive,
   History,
@@ -14,7 +13,10 @@ import {
 import { NavLink } from 'react-router';
 import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
+import { AppLogo } from '@/components/AppLogo';
+import { useRuns } from '@/features/history/api';
 import { useVolumes } from '@/features/volumes/api';
+import { useT } from '@/lib/i18n';
 
 interface NavItem {
   to: string;
@@ -22,24 +24,25 @@ interface NavItem {
   icon: LucideIcon;
 }
 
-const mainItems: NavItem[] = [
-  { to: '/', label: 'Přehled', icon: LayoutGrid },
-  { to: '/ulohy', label: 'Úlohy', icon: FolderSync },
-  { to: '/disky', label: 'Disky', icon: HardDrive },
-  { to: '/historie', label: 'Historie', icon: History },
-];
-
-const settingsItem: NavItem = { to: '/nastaveni', label: 'Nastavení', icon: Settings };
-
 export function Sidebar() {
+  const { t } = useT();
   const volumes = useVolumes();
+  const runs = useRuns();
+  const mainItems: NavItem[] = [
+    { to: '/', label: t.nav.overview, icon: LayoutGrid },
+    { to: '/ulohy', label: t.nav.jobs, icon: FolderSync },
+    { to: '/disky', label: t.nav.volumes, icon: HardDrive },
+    { to: '/historie', label: t.nav.history, icon: History },
+  ];
+  const settingsItem: NavItem = { to: '/nastaveni', label: t.nav.settings, icon: Settings };
   const needsAttention =
     volumes.data?.registered.filter((v) => v.status.state === 'needsConfirmation').length ?? 0;
+  const failedRuns = runs.data?.filter((run) => run.status === 'failed').length ?? 0;
 
   return (
     <Box
       component="nav"
-      aria-label="Hlavní navigace"
+      aria-label={t.nav.main}
       sx={{
         width: 96,
         flexShrink: 0,
@@ -50,23 +53,24 @@ export function Sidebar() {
         py: 3.5,
       }}
     >
-      <Box
-        aria-hidden
-        sx={(theme) => ({
-          width: 52,
-          height: 52,
-          borderRadius: '50%',
-          display: 'grid',
-          placeItems: 'center',
-          bgcolor: ds(theme).ink,
-          color: ds(theme).mint,
-          animation: `${popIn} 500ms ${ease.spring} backwards`,
-          '& svg': { transition: `transform 600ms ${ease.spring}` },
-          '&:hover svg': { transform: 'rotate(-160deg)' },
-        })}
-      >
-        <DatabaseBackup size={24} />
-      </Box>
+      <Tooltip title={t.nav.app} placement="right">
+        <NavLink to="/" end aria-label={t.nav.app} style={{ borderRadius: 12 }}>
+          <Box
+            sx={(theme) => ({
+              width: 52,
+              height: 52,
+              display: 'grid',
+              placeItems: 'center',
+              color: ds(theme).ink,
+              animation: `${popIn} 500ms ${ease.spring} backwards`,
+              '& svg': { transition: `transform ${duration.hover}ms ${ease.spring}` },
+              '&:hover svg': { transform: 'scale(1.08)' },
+            })}
+          >
+            <AppLogo size={44} />
+          </Box>
+        </NavLink>
+      </Tooltip>
 
       <Box
         sx={(theme) => ({
@@ -81,7 +85,11 @@ export function Sidebar() {
         })}
       >
         {mainItems.map((item) => (
-          <RailLink key={item.to} item={item} badge={item.to === '/disky' ? needsAttention : 0} />
+          <RailLink
+            key={item.to}
+            item={item}
+            badge={item.to === '/disky' ? needsAttention : item.to === '/historie' ? failedRuns : 0}
+          />
         ))}
       </Box>
 

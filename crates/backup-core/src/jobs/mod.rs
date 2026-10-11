@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 pub use locate::{LocatedFolder, locate};
 
 use crate::domain::{
-    BackupMode, Job, JobId, JobSpec, Location, SourceVolume, VolumeId, now_ms, validate_name,
+    BackupMode, Job, JobGroup, JobGroupId, JobId, JobSpec, Location, MAX_JOB_GROUPS, SourceVolume,
+    VolumeId, now_ms, validate_group_name, validate_name,
 };
 use crate::storage::Config;
 use crate::volumes::{LiveVolume, VolumeStatus, registry, resolve, resolve_source};
@@ -53,6 +54,14 @@ pub struct JobView {
     pub target: EndpointView,
 }
 
+/// Jobs page payload: named groups plus every job view.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct JobsOverview {
+    pub groups: Vec<JobGroup>,
+    pub jobs: Vec<JobView>,
+}
+
 pub fn create(config: &mut Config, input: JobInput, live: &[LiveVolume]) -> CoreResult<Job> {
     let spec = prepare(config, input, live, None)?;
     let now = now_ms();
@@ -63,6 +72,7 @@ pub fn create(config: &mut Config, input: JobInput, live: &[LiveVolume]) -> Core
         target: spec.target,
         mode: spec.mode,
         excludes: spec.excludes,
+        group_id: None,
         created_at_ms: now,
         updated_at_ms: now,
     };
@@ -127,6 +137,102 @@ pub fn views(config: &Config, live: &[LiveVolume]) -> Vec<JobView> {
             target: endpoint(config, &job.target, live),
         })
         .collect()
+}
+
+pub fn overview(config: &Config, live: &[LiveVolume]) -> JobsOverview {
+    let mut groups = config.groups.clone();
+    groups.sort_by(|a, b| {
+        a.sort_order
+            .cmp(&b.sort_order)
+            .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+    });
+    JobsOverview {
+        groups,
+        jobs: views(config, live),
+    }
+}
+
+/// Creates a group and assigns the given jobs to it.
+pub fn create_group(config: &mut Config, name: String, job_ids: &[JobId]) -> CoreResult<JobGroup> {
+    if config.groups.len() >= MAX_JOB_GROUPS {
+        return Err(CoreError::TooManyGroups);
+    }
+    let name = validate_group_name(&name)?;
+    for id in job_ids {
+        if !config.jobs.iter().any(|job| job.id == *id) {
+            return Err(CoreError::JobNotFound);
+        }
+    }
+    let sort_order = config
+        .groups
+        .iter()
+        .map(|group| group.sort_order)
+        .max()
+        .map_or(0, |max| max.saturating_add(1));
+    let group = JobGroup {
+        id: JobGroupId::new(),
+        name,
+        sort_order,
+    };
+    for id in job_ids {
+        if let Some(job) = config.jobs.iter_mut().find(|job| job.id == *id) {
+            job.group_id = Some(group.id);
+            job.updated_at_ms = now_ms();
+        }
+    }
+    config.groups.push(group.clone());
+    Ok(group)
+}
+
+pub fn rename_group(config: &mut Config, id: JobGroupId, name: String) -> CoreResult<JobGroup> {
+    let name = validate_group_name(&name)?;
+    let group = config
+        .groups
+        .iter_mut()
+        .find(|group| group.id == id)
+        .ok_or(CoreError::GroupNotFound)?;
+    group.name = name;
+    Ok(group.clone())
+}
+
+/// Removes the group and clears `group_id` on its jobs (jobs themselves stay).
+pub fn delete_group(config: &mut Config, id: JobGroupId) -> CoreResult<()> {
+    let index = config
+        .groups
+        .iter()
+        .position(|group| group.id == id)
+        .ok_or(CoreError::GroupNotFound)?;
+    config.groups.remove(index);
+    for job in &mut config.jobs {
+        if job.group_id == Some(id) {
+            job.group_id = None;
+            job.updated_at_ms = now_ms();
+        }
+    }
+    Ok(())
+}
+
+/// Moves jobs into a group, or clears the group when `group_id` is `None`.
+pub fn set_jobs_group(
+    config: &mut Config,
+    job_ids: &[JobId],
+    group_id: Option<JobGroupId>,
+) -> CoreResult<()> {
+    if let Some(id) = group_id
+        && !config.groups.iter().any(|group| group.id == id)
+    {
+        return Err(CoreError::GroupNotFound);
+    }
+    for id in job_ids {
+        let job = config
+            .jobs
+            .iter_mut()
+            .find(|job| job.id == *id)
+            .ok_or(CoreError::JobNotFound)?;
+        job.group_id = group_id;
+        job.updated_at_ms = now_ms();
+    }
+    Ok(())
 }
 
 fn prepare(
@@ -385,5 +491,25 @@ mod tests {
         delete(&mut f.config, job.id).unwrap();
         unregister_volume(&mut f.config, f.target).unwrap();
         assert!(f.config.volumes.is_empty());
+    }
+
+    #[test]
+    fn create_group_assigns_selected_jobs() {
+        let mut f = fixture();
+        let a = add(&mut f, "Fotky", r"Zaloha\Fotky").unwrap();
+        let b = add(&mut f, "Hudba", r"Zaloha\Hudba").unwrap();
+        let group =
+            create_group(&mut f.config, " WD Elements 2 TB ".into(), &[a.id, b.id]).unwrap();
+        assert_eq!(group.name, "WD Elements 2 TB");
+        assert_eq!(f.config.groups.len(), 1);
+        assert_eq!(f.config.jobs[0].group_id, Some(group.id));
+        assert_eq!(f.config.jobs[1].group_id, Some(group.id));
+
+        rename_group(&mut f.config, group.id, "Archiv".into()).unwrap();
+        assert_eq!(f.config.groups[0].name, "Archiv");
+
+        delete_group(&mut f.config, group.id).unwrap();
+        assert!(f.config.groups.is_empty());
+        assert!(f.config.jobs.iter().all(|job| job.group_id.is_none()));
     }
 }

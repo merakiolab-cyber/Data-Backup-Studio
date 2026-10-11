@@ -30,38 +30,47 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Úložiště `config.json` (atomický zápis, schéma v2 s migrací z v1)
 - [x] Zdrojové disky bez značky (GUID + sériové číslo), výběr složky přes dialog → `locate_folder`
 - [x] Editor úlohy: zdroj, cíl, režim, vyloučení, název
-- [x] Přehled úloh (karty se stavem disků; poslední běh doplní fáze 5) – samostatná stránka Úlohy v menu
-- [x] Karta Statistiky na Přehledu (z disků a úloh; statistiky záloh – objem, počet běhů – doplní fáze 5)
-- [ ] Ruční test se skutečnými disky (vytvořit úlohu, přepojit USB → cesta na kartě se změní)
+- [x] Přehled úloh (karty se stavem disků a posledním během) – samostatná stránka Úlohy v menu
+- [x] Skupiny úloh (pojmenování podle záložního disku, sbalitelné sekce, schéma v4)
+- [x] Karta Statistiky na Přehledu (disky, úlohy, počet záloh a zkopírovaný objem)
+- [x] Ruční test se skutečnými disky (vytvořit úlohu, přepojit USB → cesta na kartě se změní)
 
 ## Fáze 4 – Engine
-- [ ] Scan (jwalk) + filtry (globset)
-- [ ] Diff → plán, tolerance mtime
-- [ ] Náhled plánu (dry-run) v UI
-- [ ] Execute: `.dbs-partial` + rename, mtime, paralelismus, zrušení
-- [ ] Pojistky Zrcadla (prázdný zdroj, práh mazání)
-- [ ] Průběh přes události (rychlost, ETA, aktuální soubor)
-- [ ] Integrační testy enginu
+- [x] Scan (jwalk) + filtry (globset)
+- [x] Diff → plán, tolerance mtime 2 s (existující cíl se přebírá, nekopíruje se znovu)
+- [x] Náhled plánu (dry-run) v UI + Spustit na kartě úlohy
+- [x] Execute: `.dbs-partial` + rename, mtime, zrušení i uprostřed souboru (1 MB bloky)
+- [x] Pojistky Zrcadla (prázdný zdroj, práh mazání 20 %)
+- [x] Průběh `run-progress` (fáze, soubor, byty, rychlost, ETA)
+- [x] Integrační testy enginu (`tests/engine_mirror.rs`) včetně převzetí existujícího cíle
+- [x] Paralelní kopírování (konfigurovatelný počet pracovníků)
+- [x] Rychlost a ETA v UI průběhu
+- [x] Minimalizace běhu + fronta dalších úloh (ADR 0010)
 
 ## Fáze 5 – Historie a diagnostika
-- [ ] `history.db` (SQLite) – běhy, chyby
-- [ ] Obrazovka „Historie“ s detailem chyb
-- [ ] Logy do souborů s rotací
+- [x] `history.db` (SQLite) – běhy, chyby
+- [x] Obrazovka „Historie“ s detailem chyb
+- [x] Logy do souborů s rotací
 
 ## Fáze 6 – Dotažení a release
-- [ ] Nastavení (téma, počet vláken, tolerance, práh mazání), export/import konfigurace
-- [ ] „Spustit vše“ (sekvenčně, jen úlohy s připojenými disky)
-- [ ] Volitelné ověření kopií (blake3)
-- [ ] NSIS instalátor s offline WebView2 + portable exe
-- [ ] v1.0.0
+- [x] Nastavení (téma, jazyk cs/en, počet vláken, tolerance, práh mazání), export/import konfigurace
+- [x] „Spustit vše“ / označené (sekvenčně, jen úlohy s připojenými disky)
+- [x] Volitelné ověření kopií (blake3)
+- [x] Otevření složek v Průzkumníku (úloha, data aplikace), Spustit na Přehledu
+- [x] Kompletní audit bezpečnosti, čistoty a efektivity kódu (validace importu, cache enumerace, bez Zustand)
+- [x] Úklid repa (nepoužívané ikony/konstanty, `.gitignore` pro `gen/`, bez `dist/` v pracovním stromu)
+- [x] Zrcadlo přebírá existující zálohu (diff i při prvním běhu; vysvětlivky v UI)
+- [x] NSIS instalátor s offline WebView2 + portable exe (`releases/0.1.0/`, mimo git)
+- [x] v1.0.0 (2026-10-11 – tag `v1.0.0`, artefakty v `releases/1.0.0/` mimo git)
 
 ## Fáze 7 – Zveřejnění na GitHubu (portfolio)
 Až bude aplikace hotová a odladěná.
 - [ ] Audit historie gitu na osobní data (`git log -p`, hledání cest, jmen disků, sériových čísel)
 - [ ] Rozhodnout e-mail autora commitů (veřejný vs. GitHub `noreply`), případně přepsat historii
 - [ ] Ověřit, že konfigurace a historie běhů jsou jen v `%APPDATA%`, nikdy v repu
-- [ ] LICENSE (předběžně MIT), README v angličtině + screenshoty s fiktivními daty
-- [ ] GitHub Actions: `pnpm check`, testy, build instalátoru
+- [x] LICENSE (MIT); README česky + screenshot s fiktivními daty
+- [x] README v angličtině (`README.en.md`)
+- [x] GitHub Actions: `pnpm check`, testy, `cargo test --workspace`; na `main`/`master` i `pnpm tauri build` (artefakty)
 - [ ] Release na GitHubu s instalátorem a SHA256
 
 ## Nápady na později

@@ -2,28 +2,49 @@ mod commands;
 mod error;
 mod state;
 
-use backup_core::storage::ConfigStore;
+use backup_core::storage::{ConfigStore, HistoryStore};
 use tauri::Manager;
-use tauri_specta::{Builder, collect_commands};
+use tauri_specta::{Builder, collect_commands, collect_events};
 
+use crate::commands::run::RunProgressEvent;
 use crate::state::AppState;
 
 const BINDINGS_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../src/lib/bindings.ts");
 
 fn specta_builder() -> Builder<tauri::Wry> {
-    Builder::<tauri::Wry>::new().commands(collect_commands![
-        commands::app::app_info,
-        commands::volumes::list_volumes,
-        commands::volumes::register_volume,
-        commands::volumes::rename_volume,
-        commands::volumes::unregister_volume,
-        commands::volumes::confirm_volume,
-        commands::jobs::list_jobs,
-        commands::jobs::locate_folder,
-        commands::jobs::create_job,
-        commands::jobs::update_job,
-        commands::jobs::delete_job,
-    ])
+    Builder::<tauri::Wry>::new()
+        .commands(collect_commands![
+            commands::app::app_info,
+            commands::app::open_location,
+            commands::app::open_data_dir,
+            commands::volumes::list_volumes,
+            commands::volumes::register_volume,
+            commands::volumes::rename_volume,
+            commands::volumes::unregister_volume,
+            commands::volumes::confirm_volume,
+            commands::volumes::reorder_volumes,
+            commands::jobs::list_jobs,
+            commands::jobs::locate_folder,
+            commands::jobs::create_job,
+            commands::jobs::update_job,
+            commands::jobs::delete_job,
+            commands::jobs::create_job_group,
+            commands::jobs::rename_job_group,
+            commands::jobs::delete_job_group,
+            commands::jobs::set_jobs_group,
+            commands::run::preview_job,
+            commands::run::run_job,
+            commands::run::cancel_run,
+            commands::history::list_runs,
+            commands::history::get_run,
+            commands::history::get_run_log,
+            commands::history::open_run_log,
+            commands::settings::get_settings,
+            commands::settings::update_settings,
+            commands::settings::export_config,
+            commands::settings::import_config,
+        ])
+        .events(collect_events![RunProgressEvent])
 }
 
 fn export_bindings(builder: &Builder<tauri::Wry>) -> Result<(), String> {
@@ -46,7 +67,11 @@ pub fn run() {
         .setup(move |app| {
             builder.mount_events(app);
             let config_dir = app.path().app_config_dir()?;
-            app.manage(AppState::new(ConfigStore::open(&config_dir)?));
+            app.manage(AppState::new(
+                config_dir.clone(),
+                ConfigStore::open(&config_dir)?,
+                HistoryStore::open(&config_dir)?,
+            ));
             Ok(())
         })
         .run(tauri::generate_context!());

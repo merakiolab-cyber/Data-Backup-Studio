@@ -2,7 +2,7 @@ use globset::Glob;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{Location, MARKER_DIR, PathProblem, normalize_rel_path, validate_name};
+use super::{JobGroupId, Location, MARKER_DIR, PathProblem, normalize_rel_path, validate_name};
 use crate::{CoreError, CoreResult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, specta::Type)]
@@ -42,6 +42,9 @@ pub struct Job {
     pub mode: BackupMode,
     /// Glob patterns relative to the source folder, e.g. `**/node_modules/**`.
     pub excludes: Vec<String>,
+    /// Optional named group on the Jobs page (e.g. backup disk name).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<JobGroupId>,
     #[specta(type = specta_typescript::Number)]
     pub created_at_ms: u64,
     #[specta(type = specta_typescript::Number)]
