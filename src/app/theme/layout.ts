@@ -30,3 +30,17 @@ export function cardGridSx(
     },
   };
 }
+
+/** Two equal columns that fill the page; one column on a narrow window. */
+export function twoColumnSx(gap: number = 2): SxProps<Theme> {
+  return {
+    display: 'grid',
+    gap,
+    width: '100%',
+    alignItems: 'stretch',
+    gridTemplateColumns: {
+      xs: '1fr',
+      md: 'repeat(2, minmax(0, 1fr))',
+    },
+  };
+}

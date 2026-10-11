@@ -1,10 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { commands, type VolumeId } from '@/lib/bindings';
+import { useEffect } from 'react';
+import { commands, events, type VolumeId } from '@/lib/bindings';
 import { unwrap } from '@/lib/result';
 
 const volumesKey = ['volumes'] as const;
 
-/** Polls only while the window is focused so a USB disk appears within seconds. */
+/** Refreshes disks when Windows reports a USB change (`WM_DEVICECHANGE`). */
+export function useVolumeChangeListener() {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    let timer = 0;
+    const unlisten = events.volumesChangedEvent.listen(() => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        void queryClient.invalidateQueries({ queryKey: volumesKey });
+      }, 400);
+    });
+    return () => {
+      window.clearTimeout(timer);
+      void unlisten.then((stop) => stop());
+    };
+  }, [queryClient]);
+}
+
+/** Enumerates on focus; USB plug/unplug is pushed from the backend. */
 export function useVolumes() {
   const queryClient = useQueryClient();
   return useQuery({
@@ -14,7 +33,7 @@ export function useVolumes() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] });
       return data;
     },
-    refetchInterval: () => (document.hasFocus() ? 4000 : false),
+    refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
   });

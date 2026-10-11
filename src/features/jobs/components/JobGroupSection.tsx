@@ -13,7 +13,7 @@ import { cardGridSx } from '@/app/theme/layout';
 import { duration, ease } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { JobGroup, JobGroupId, JobId, JobView, RunSummary } from '@/lib/bindings';
-import { fmt, useT } from '@/lib/i18n';
+import { fmt, plural, useT } from '@/lib/i18n';
 import { decodeJobDrag } from '../groupLayout';
 import { JobCard } from './JobCard';
 
@@ -44,13 +44,13 @@ export function JobGroupSection({
   onRename?: (() => void) | undefined;
   onDelete?: (() => void) | undefined;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [dropOver, setDropOver] = useState(false);
   const dragDepth = useRef(0);
   const title = group?.name ?? t.jobs.ungrouped;
-  const countLabel = fmt(t.jobs.groupCount, { count: jobs.length });
+  const countLabel = plural(locale, jobs.length, t.jobs.groupCount);
   const ids = jobs.map((view) => view.job.id);
   const allInGroup = ids.length > 0 && ids.every((id) => selected.has(id));
 
@@ -138,6 +138,9 @@ export function JobGroupSection({
             {title}
           </Typography>
         </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, pr: 0.5 }}>
+          {countLabel}
+        </Typography>
         <Button
           size="small"
           color="inherit"
@@ -147,9 +150,6 @@ export function JobGroupSection({
         >
           {allInGroup ? t.jobs.clearSelection : t.jobs.select}
         </Button>
-        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, pr: 0.5 }}>
-          {countLabel}
-        </Typography>
         {group && (
           <>
             <IconButton

@@ -46,6 +46,7 @@ export const commands = {
 /** Events */
 export const events = {
 	runProgressEvent: makeEvent<RunProgressEvent>("run-progress-event"),
+	volumesChangedEvent: makeEvent<VolumesChangedEvent>("volumes-changed-event"),
 };
 
 /* Types */
@@ -352,6 +353,10 @@ export type VolumeMarker = {
 };
 
 export type VolumeStatus = { state: "connected" } | { state: "needsConfirmation"; reason: ConfirmReason } | { state: "disconnected" };
+
+export type VolumesChangedEvent = {
+	kind: string,
+};
 
 export type VolumesOverview = {
 	registered: RegisteredVolumeView[],

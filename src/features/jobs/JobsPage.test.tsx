@@ -63,6 +63,7 @@ vi.mock('@/lib/bindings', () => ({
   },
   events: {
     runProgressEvent: { listen: vi.fn(async () => () => undefined) },
+    volumesChangedEvent: { listen: vi.fn(async () => () => undefined) },
   },
 }));
 
@@ -122,7 +123,10 @@ describe('JobsPage', () => {
   it('renames the batch button when a job tile is selected', async () => {
     renderPage(<JobsPage />);
     const ready = await screen.findByRole('article', { name: 'Fotky' });
+    fireEvent.pointerDown(ready, { button: 0, clientX: 20, clientY: 20 });
+    fireEvent.pointerUp(ready, { button: 0, clientX: 22, clientY: 21 });
     fireEvent.click(ready);
+    expect(ready).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('button', { name: 'Spustit označené' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Seskupit' })).toBeEnabled();
   });

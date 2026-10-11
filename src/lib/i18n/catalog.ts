@@ -133,7 +133,11 @@ export const cs = {
     deleteGroupConfirm: 'Zrušit skupinu „{name}“? Úlohy zůstanou, jen se odseskupí.',
     groupName: 'Název skupiny',
     groupNameHint: 'Např. jméno záložního disku – snáz najdeš, kam co patří.',
-    groupCount: '{count} úloh',
+    groupCount: {
+      one: '{count} úloha',
+      few: '{count} úlohy',
+      other: '{count} úloh',
+    },
     ungrouped: 'Bez skupiny',
     expandGroup: 'Rozbalit skupinu',
     collapseGroup: 'Sbalit skupinu',
@@ -494,7 +498,11 @@ export const en: Messages = {
     deleteGroupConfirm: 'Remove group “{name}”? Jobs stay; they just become ungrouped.',
     groupName: 'Group name',
     groupNameHint: 'e.g. the backup disk name — easier to find where things belong.',
-    groupCount: '{count} jobs',
+    groupCount: {
+      one: '{count} job',
+      few: '{count} jobs',
+      other: '{count} jobs',
+    },
     ungrouped: 'Ungrouped',
     expandGroup: 'Expand group',
     collapseGroup: 'Collapse group',
@@ -728,4 +736,27 @@ export const catalogs: Record<Locale, Messages> = { cs, en };
 
 export function fmt(template: string, vars: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => String(vars[key] ?? ''));
+}
+
+/** Czech: 1 úloha, 2–4 úlohy, 5+ / 11–14 úloh; 21 úloha, 22 úlohy. */
+export function czechCountForm(count: number): 'one' | 'few' | 'other' {
+  const n = Math.abs(Math.trunc(count));
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) {
+    return 'one';
+  }
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+    return 'few';
+  }
+  return 'other';
+}
+
+export function plural(
+  locale: Locale,
+  count: number,
+  forms: { one: string; few: string; other: string },
+): string {
+  const form = locale === 'en' ? (count === 1 ? 'one' : 'other') : czechCountForm(count);
+  return fmt(forms[form], { count });
 }

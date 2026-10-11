@@ -1,8 +1,11 @@
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { Plus } from 'lucide-react';
+import { CircleHelp, Plus } from 'lucide-react';
 import { type KeyboardEvent, useState } from 'react';
 import { useT } from '@/lib/i18n';
 import { suggestedExcludes } from '../labels';
@@ -46,7 +49,24 @@ export function ExcludesField({
           add(draft);
           setDraft('');
         }}
-        helperText={t.editor.patternHelp}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <Tooltip title={t.editor.patternHelp}>
+                  <IconButton
+                    size="small"
+                    aria-label={t.editor.patternHelp}
+                    edge="end"
+                    tabIndex={0}
+                  >
+                    <CircleHelp size={18} />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ),
+          },
+        }}
       />
       {value.length > 0 && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>

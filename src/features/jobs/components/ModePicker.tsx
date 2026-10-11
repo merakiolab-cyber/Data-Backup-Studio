@@ -3,7 +3,6 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Typography from '@mui/material/Typography';
 import { CopyCheck, FilePlus2 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cardGridSx } from '@/app/theme/layout';
 import { duration, ease, popIn } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import { IconBubble } from '@/components/IconBubble';
@@ -28,7 +27,11 @@ export function ModePicker({
   const { t } = useT();
   const labels = modeLabels(t);
   return (
-    <Box role="radiogroup" aria-label={t.mode.group} sx={cardGridSx('compact', 1.5)}>
+    <Box
+      role="radiogroup"
+      aria-label={t.mode.group}
+      sx={{ display: 'grid', gap: 1.5, width: '100%', gridTemplateColumns: '1fr' }}
+    >
       {order.map((mode) => {
         const selected = mode === value;
         return (
@@ -42,6 +45,8 @@ export function ModePicker({
               alignItems: 'flex-start',
               justifyContent: 'flex-start',
               gap: 2,
+              width: '100%',
+              minWidth: 0,
               p: 2,
               textAlign: 'left',
               borderRadius: '22px',
@@ -65,7 +70,7 @@ export function ModePicker({
                 {icons[mode]}
               </IconBubble>
             </Box>
-            <Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography variant="subtitle1">{labels[mode].title}</Typography>
               <Typography variant="body2" sx={{ opacity: 0.75 }}>
                 {labels[mode].description}

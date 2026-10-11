@@ -4,7 +4,7 @@ import { catalogs, type Locale, type Messages } from './catalog';
 import { persistLocale, readStoredLocale, setActiveLocale, toLocale } from './locale';
 
 export type { Locale, Messages } from './catalog';
-export { fmt } from './catalog';
+export { fmt, plural } from './catalog';
 export { getActiveLocale, toLocale } from './locale';
 
 interface I18nValue {

@@ -129,7 +129,8 @@ UI průběžně ukazuje, které registrované disky jsou připojené a pod jaký
   ADR 0007, 0008, 0009, 0011.
 - Příkazy dostávají `guid_path`/`id`, nikdy cestu; svazek se vždy dohledá v enumeraci.
   Seznam disků/úloh sdílí krátkou cache (~1,2 s); registrace, náhled a běh enumerují znovu.
-- UI obnovuje seznam disků každé 4 s (jen když je okno aktivní). Úlohy se obnoví z téhož pollu.
+- UI obnovuje seznam disků po `WM_DEVICECHANGE` a po návratu do okna (ADR 0012). Úlohy se obnoví
+  ze stejného načtení. Periodický poll odpadá.
 - Import konfigurace znovu validuje úlohy (stejná pravidla jako editor).
 
 ### Implementace úloh (fáze 3)

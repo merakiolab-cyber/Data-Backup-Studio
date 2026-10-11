@@ -8,9 +8,18 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft, Folder, FolderOpen, FolderSearch, HardDrive, Save } from 'lucide-react';
+import {
+  ArrowLeft,
+  CircleHelp,
+  Folder,
+  FolderOpen,
+  FolderSearch,
+  HardDrive,
+  Save,
+} from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { twoColumnSx } from '@/app/theme/layout';
 import { stagger } from '@/app/theme/motion';
 import { EmptyState } from '@/components/EmptyState';
 import { IconBubble } from '@/components/IconBubble';
@@ -151,156 +160,190 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
       component="form"
       noValidate
       onSubmit={handleSubmit}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 820, ...stagger(60) }}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, ...stagger(60) }}
     >
-      <FormBlock step={1} title={t.editor.stepSource} description={t.editor.stepSourceHint}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <IconBubble size={56} tone="muted">
-            {form.source ? <Folder size={24} /> : <FolderOpen size={24} />}
-          </IconBubble>
-          <Box sx={{ flex: 1, minWidth: 200 }}>
-            {form.source ? (
-              <>
-                <Typography variant="caption" color="text.secondary" component="p">
-                  {form.source.volumeName}
-                </Typography>
-                <Typography variant="subtitle1" sx={{ wordBreak: 'break-all' }}>
-                  {displayLocation(form.source.relPath, form.source.path)}
-                </Typography>
-              </>
-            ) : (
-              <Typography color="text.secondary">{t.editor.noFolder}</Typography>
-            )}
+      <Box sx={twoColumnSx(2.5)}>
+        <FormBlock step={1} title={t.editor.stepSource} description={t.editor.stepSourceHint}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+            <IconBubble size={56} tone="muted">
+              {form.source ? <Folder size={24} /> : <FolderOpen size={24} />}
+            </IconBubble>
+            <Box sx={{ flex: 1, minWidth: 200 }}>
+              {form.source ? (
+                <>
+                  <Typography variant="caption" color="text.secondary" component="p">
+                    {form.source.volumeName}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ wordBreak: 'break-all' }}>
+                    {displayLocation(form.source.relPath, form.source.path)}
+                  </Typography>
+                </>
+              ) : (
+                <Typography color="text.secondary">{t.editor.noFolder}</Typography>
+              )}
+            </Box>
+            <Button
+              variant={form.source ? 'outlined' : 'contained'}
+              startIcon={<FolderSearch size={18} />}
+              onClick={pickSource}
+              disabled={picking}
+            >
+              {form.source ? t.editor.change : t.editor.pickFolder}
+            </Button>
           </Box>
-          <Button
-            variant={form.source ? 'outlined' : 'contained'}
-            startIcon={<FolderSearch size={18} />}
-            onClick={pickSource}
-            disabled={picking}
-          >
-            {form.source ? t.editor.change : t.editor.pickFolder}
-          </Button>
-        </Box>
-      </FormBlock>
+        </FormBlock>
 
-      <FormBlock step={2} title={t.editor.stepTarget} description={t.editor.stepTargetHint}>
-        {targets.length === 0 && !volumes.isPending ? (
-          <Alert
-            severity="info"
-            action={
-              <Button component={Link} to="/disky" size="small">
-                Disky
-              </Button>
+        <FormBlock step={2} title={t.editor.stepTarget} description={t.editor.stepTargetHint}>
+          {targets.length === 0 && !volumes.isPending ? (
+            <Alert
+              severity="info"
+              action={
+                <Button component={Link} to="/disky" size="small">
+                  Disky
+                </Button>
+              }
+            >
+              {t.editor.registerFirst}
+            </Alert>
+          ) : (
+            <Box
+              sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 2 }}
+            >
+              <TextField
+                select
+                label={t.editor.disk}
+                value={form.targetVolumeId ?? ''}
+                onChange={(event) => setForm((f) => ({ ...f, targetVolumeId: event.target.value }))}
+              >
+                {targets.map((vol) => (
+                  <MenuItem key={vol.volume.id} value={vol.volume.id}>
+                    <HardDrive size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+                    {vol.volume.name}
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
+                      {targetState(vol, t)}
+                    </Typography>
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  fullWidth
+                  label={t.editor.folderOnDisk}
+                  value={form.targetRelPath}
+                  onChange={(event) =>
+                    setForm((f) => ({ ...f, targetRelPath: event.target.value }))
+                  }
+                  slotProps={{
+                    input: {
+                      startAdornment: target?.live ? (
+                        <InputAdornment position="start">
+                          {driveLabel(target.live.mountPoint)}\
+                        </InputAdornment>
+                      ) : undefined,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title={t.editor.folderCreated}>
+                            <IconButton
+                              size="small"
+                              aria-label={t.editor.folderCreated}
+                              edge="end"
+                              tabIndex={0}
+                            >
+                              <CircleHelp size={18} />
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+                <Tooltip title={target?.live ? t.editor.pickExisting : t.editor.diskOff}>
+                  <span>
+                    <IconButton
+                      aria-label={t.editor.pickTargetFolder}
+                      onClick={pickTarget}
+                      disabled={!target?.live || picking}
+                      sx={{ mt: '6px' }}
+                    >
+                      <FolderSearch size={20} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+            </Box>
+          )}
+        </FormBlock>
+      </Box>
+
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2.5,
+          width: '100%',
+          alignItems: 'stretch',
+          gridTemplateColumns: {
+            xs: '1fr',
+            md: groups.length > 0 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
+          },
+        }}
+      >
+        <FormBlock step={3} title={t.editor.stepMode} description={t.editor.stepModeHint}>
+          <ModePicker value={form.mode} onChange={(mode) => setForm((f) => ({ ...f, mode }))} />
+        </FormBlock>
+
+        <FormBlock step={4} title={t.editor.stepName} description={t.editor.stepNameHint}>
+          <TextField
+            fullWidth
+            label={t.editor.jobName}
+            value={form.name}
+            onChange={(event) =>
+              setForm((f) => ({ ...f, name: event.target.value, nameTouched: true }))
             }
-          >
-            {t.editor.registerFirst}
-          </Alert>
-        ) : (
-          <Box
-            sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' }, gap: 2 }}
-          >
+            error={form.name.trim().length > MAX_NAME_LENGTH}
+            helperText={`${form.name.trim().length}/${MAX_NAME_LENGTH} ${t.common.characters}`}
+          />
+        </FormBlock>
+
+        {groups.length > 0 && (
+          <FormBlock step={5} title={t.editor.stepGroup} description={t.editor.stepGroupHint}>
             <TextField
               select
-              label={t.editor.disk}
-              value={form.targetVolumeId ?? ''}
-              onChange={(event) => setForm((f) => ({ ...f, targetVolumeId: event.target.value }))}
+              fullWidth
+              label={t.editor.stepGroup}
+              value={form.groupId ?? ''}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  groupId: event.target.value === '' ? null : event.target.value,
+                }))
+              }
             >
-              {targets.map((vol) => (
-                <MenuItem key={vol.volume.id} value={vol.volume.id}>
-                  <HardDrive size={16} style={{ marginRight: 8, flexShrink: 0 }} />
-                  {vol.volume.name}
-                  <Typography
-                    component="span"
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ ml: 1 }}
-                  >
-                    {targetState(vol, t)}
-                  </Typography>
+              <MenuItem value="">{t.jobs.ungrouped}</MenuItem>
+              {groups.map((group) => (
+                <MenuItem key={group.id} value={group.id}>
+                  {group.name}
                 </MenuItem>
               ))}
             </TextField>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <TextField
-                fullWidth
-                label={t.editor.folderOnDisk}
-                value={form.targetRelPath}
-                onChange={(event) => setForm((f) => ({ ...f, targetRelPath: event.target.value }))}
-                slotProps={{
-                  input: {
-                    startAdornment: target?.live ? (
-                      <InputAdornment position="start">
-                        {driveLabel(target.live.mountPoint)}\
-                      </InputAdornment>
-                    ) : undefined,
-                  },
-                }}
-                helperText={t.editor.folderCreated}
-              />
-              <Tooltip title={target?.live ? t.editor.pickExisting : t.editor.diskOff}>
-                <span>
-                  <IconButton
-                    aria-label={t.editor.pickTargetFolder}
-                    onClick={pickTarget}
-                    disabled={!target?.live || picking}
-                    sx={{ mt: '6px' }}
-                  >
-                    <FolderSearch size={20} />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </Box>
-          </Box>
+          </FormBlock>
         )}
-      </FormBlock>
+      </Box>
 
-      <FormBlock step={3} title={t.editor.stepMode} description={t.editor.stepModeHint}>
-        <ModePicker value={form.mode} onChange={(mode) => setForm((f) => ({ ...f, mode }))} />
-      </FormBlock>
-
-      <FormBlock step={4} title={t.editor.stepExcludes} description={t.editor.stepExcludesHint}>
+      <FormBlock
+        step={groups.length > 0 ? 6 : 5}
+        title={t.editor.stepExcludes}
+        description={t.editor.stepExcludesHint}
+      >
         <ExcludesField
           value={form.excludes}
           onChange={(excludes) => setForm((f) => ({ ...f, excludes }))}
         />
       </FormBlock>
-
-      <FormBlock step={5} title={t.editor.stepName} description={t.editor.stepNameHint}>
-        <TextField
-          fullWidth
-          label={t.editor.jobName}
-          value={form.name}
-          onChange={(event) =>
-            setForm((f) => ({ ...f, name: event.target.value, nameTouched: true }))
-          }
-          error={form.name.trim().length > MAX_NAME_LENGTH}
-          helperText={`${form.name.trim().length}/${MAX_NAME_LENGTH} ${t.common.characters}`}
-        />
-      </FormBlock>
-
-      {groups.length > 0 && (
-        <FormBlock step={6} title={t.editor.stepGroup} description={t.editor.stepGroupHint}>
-          <TextField
-            select
-            fullWidth
-            label={t.editor.stepGroup}
-            value={form.groupId ?? ''}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                groupId: event.target.value === '' ? null : event.target.value,
-              }))
-            }
-          >
-            <MenuItem value="">{t.jobs.ungrouped}</MenuItem>
-            {groups.map((group) => (
-              <MenuItem key={group.id} value={group.id}>
-                {group.name}
-              </MenuItem>
-            ))}
-          </TextField>
-        </FormBlock>
-      )}
 
       {(pickError ?? save.error ?? setGroup.error) && (
         <Alert severity="error">

@@ -76,7 +76,8 @@ export function JobCard({
   const navigate = useNavigate();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const dragged = useRef(false);
+  /** Distinguishes a click from a real drag. Windows starts HTML5 drag after ~4 px. */
+  const gesture = useRef<{ x: number; y: number; far: boolean; used: boolean } | null>(null);
   const { enqueue } = useRunSession();
   const remove = useDeleteJob();
   const state = readiness(view, {
@@ -89,10 +90,29 @@ export function JobCard({
   const statuses = statusLabels(t);
   const selectable = onSelectedChange !== undefined;
 
-  const toggleSelect = () => {
-    if (dragged.current) {
-      dragged.current = false;
+  const interactive = (target: EventTarget | null) =>
+    target instanceof Element && target.closest('button, a, [role="menuitem"]') !== null;
+
+  const markFar = (x: number, y: number) => {
+    const current = gesture.current;
+    if (!current || current.far) {
       return;
+    }
+    if (Math.hypot(x - current.x, y - current.y) >= 12) {
+      current.far = true;
+    }
+  };
+
+  const trySelect = () => {
+    if (!selectable) {
+      return;
+    }
+    const current = gesture.current;
+    if (current?.used || current?.far) {
+      return;
+    }
+    if (current) {
+      current.used = true;
     }
     onSelectedChange?.(!selected);
   };
@@ -103,20 +123,55 @@ export function JobCard({
       aria-label={job.name}
       aria-selected={selectable ? selected : undefined}
       draggable={dragIds !== undefined}
+      onPointerDown={(event) => {
+        if (!selectable || event.button !== 0 || interactive(event.target)) {
+          gesture.current = null;
+          return;
+        }
+        gesture.current = { x: event.clientX, y: event.clientY, far: false, used: false };
+      }}
+      onPointerMove={(event) => {
+        if ((event.buttons & 1) === 0) {
+          return;
+        }
+        markFar(event.clientX, event.clientY);
+      }}
+      onPointerUp={(event) => {
+        if (event.button !== 0 || interactive(event.target)) {
+          return;
+        }
+        trySelect();
+      }}
       onDragStart={(event) => {
         if (!dragIds) {
           return;
         }
-        dragged.current = true;
+        if (interactive(event.target)) {
+          event.preventDefault();
+          return;
+        }
+        markFar(event.clientX, event.clientY);
         event.dataTransfer.effectAllowed = 'move';
         event.dataTransfer.setData('text/plain', encodeJobDrag(dragIds));
       }}
-      onDragEnd={() => {
-        window.setTimeout(() => {
-          dragged.current = false;
-        }, 0);
+      onDrag={(event) => {
+        if (event.clientX === 0 && event.clientY === 0) {
+          return;
+        }
+        markFar(event.clientX, event.clientY);
       }}
-      onClick={selectable ? toggleSelect : undefined}
+      onDragEnd={() => {
+        trySelect();
+        if (gesture.current) {
+          gesture.current.used = true;
+        }
+      }}
+      onClick={(event) => {
+        if (interactive(event.target)) {
+          return;
+        }
+        trySelect();
+      }}
       sx={(theme) => ({
         position: 'relative',
         display: 'flex',
@@ -299,10 +354,7 @@ function Endpoint({
   };
 
   return (
-    <Box
-      sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}
-      onClick={(event) => event.stopPropagation()}
-    >
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
       <IconBubble size={40} tone="muted">
         {icon}
       </IconBubble>

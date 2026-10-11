@@ -1,4 +1,5 @@
 mod commands;
+mod device_watch;
 mod error;
 mod state;
 
@@ -7,6 +8,7 @@ use tauri::Manager;
 use tauri_specta::{Builder, collect_commands, collect_events};
 
 use crate::commands::run::RunProgressEvent;
+use crate::device_watch::VolumesChangedEvent;
 use crate::state::AppState;
 
 const BINDINGS_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../src/lib/bindings.ts");
@@ -44,7 +46,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::settings::export_config,
             commands::settings::import_config,
         ])
-        .events(collect_events![RunProgressEvent])
+        .events(collect_events![RunProgressEvent, VolumesChangedEvent])
 }
 
 fn export_bindings(builder: &Builder<tauri::Wry>) -> Result<(), String> {
@@ -72,6 +74,7 @@ pub fn run() {
                 ConfigStore::open(&config_dir)?,
                 HistoryStore::open(&config_dir)?,
             ));
+            device_watch::start(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!());

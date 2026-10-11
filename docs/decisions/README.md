@@ -16,6 +16,7 @@ Rozhodnutí se nepřepisují – když se změní, vznikne nové ADR se stavem �
 | [0009](0009-ui-locale.md) | Jazyk UI (cs/en) v nastavení, bez i18n knihovny | Přijato |
 | [0010](0010-run-session-ui.md) | Běh jako app-wide session: minimalizace, fronta, rychlé zrušení | Přijato |
 | [0011](0011-job-groups.md) | Skupiny úloh v `config.json` v4, sbalitelné sekce na stránce Úlohy | Přijato |
+| [0012](0012-volume-change-events.md) | Obnova disků přes `WM_DEVICECHANGE` místo pollingu | Přijato |
 
 ## Šablona
 

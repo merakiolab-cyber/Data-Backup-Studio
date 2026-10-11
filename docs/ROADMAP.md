@@ -23,7 +23,7 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 - [x] Resolver `VolumeRef → aktuální písmeno` + varování při nesouladu a potvrzení disku
 - [x] Obrazovka „Disky“ s živým stavem připojení, přejmenování, odebrání
 - [x] Ruční test se skutečnými USB disky (registrace, přepojení do jiného portu → jiné písmeno)
-- [ ] Později: místo pollingu reagovat na `WM_DEVICECHANGE` (nebudit spící USB disky)
+- [x] Místo pollingu reagovat na `WM_DEVICECHANGE` (nebudit spící USB disky; ADR 0012)
 
 ## Fáze 3 – Úlohy (pravidla)
 - [x] Doména `Job`, `Location`, validace (cesty, překryvy, vzory vyloučení)
@@ -65,9 +65,11 @@ Stav: `[ ]` čeká · `[~]` rozpracováno · `[x]` hotovo
 
 ## Fáze 7 – Zveřejnění na GitHubu (portfolio)
 Až bude aplikace hotová a odladěná.
-- [ ] Audit historie gitu na osobní data (`git log -p`, hledání cest, jmen disků, sériových čísel)
-- [ ] Rozhodnout e-mail autora commitů (veřejný vs. GitHub `noreply`), případně přepsat historii
-- [ ] Ověřit, že konfigurace a historie běhů jsou jen v `%APPDATA%`, nikdy v repu
+- [x] Audit historie gitu na osobní data (2026-10-11: jen fiktivní `D:\Fotky`, `WD Elements 25A2`,
+  `0x1234ABCD`; žádné `C:\Users\<jméno>` ani reálné sériové číslo)
+- [x] Commit e-mail jen GitHub noreply (osobní e-mail v historii ani v dokumentaci není)
+- [x] Konfigurace a historie běhů jen v `%APPDATA%` (v repu nejsou `config.json` / `history.db`;
+  `.gitignore` má `*.db` a `releases/`)
 - [x] LICENSE (MIT); README česky + screenshot s fiktivními daty
 - [x] README v angličtině (`README.en.md`)
 - [x] GitHub Actions: `pnpm check`, testy, `cargo test --workspace`; na `main`/`master` i `pnpm tauri build` (artefakty)

@@ -149,8 +149,8 @@ export function JobsPage() {
       title={t.jobs.title}
       description={t.jobs.description}
       actions={
-        views.length > 0 ? (
-          <>
+        <>
+          {views.length > 0 && (
             <Tooltip title={runTitle}>
               <span>
                 <Button
@@ -168,9 +168,9 @@ export function JobsPage() {
                 </Button>
               </span>
             </Tooltip>
-            <NewJobButton />
-          </>
-        ) : undefined
+          )}
+          <NewJobButton />
+        </>
       }
     >
       {jobsQuery.isPending && <LinearProgress aria-label={t.common.loadingJobs} />}
@@ -285,7 +285,6 @@ export function JobsPage() {
             icon={<FolderSync size={32} />}
             title={t.jobs.emptyTitle}
             description={t.jobs.emptyDescription}
-            action={<NewJobButton />}
           />
         ))}
 

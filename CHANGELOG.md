@@ -5,10 +5,22 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Přidáno
+- Disky se obnoví hned po **připojení / odpojení USB** (`WM_DEVICECHANGE`). Periodický poll
+  každých 4 s odpadá. ADR 0012.
+
+### Opraveno
+- **Výběr úloh** reaguje na jedno kliknutí. Dříve i drobný pohyb myši spustil HTML5 drag
+  a klik se zahodil (kartu bylo potřeba trefit dvakrát až třikrát).
+
+### Změněno
+- **Editor úlohy** je na celou šířku (zdroj \| cíl, pak režim \| název \| skupina, vyloučení
+  dole). Dlouhé nápovědy u cíle a vzorů jsou za ikonou **?**.
+- Počet úloh u skupiny skloňuje česky: **1 úloha**, **2 úlohy**, **10 úloh**.
+
 ### Další krok
-- **Fáze 7 před zveřejněním:** audit historie gitu na osobní data; ověřit commit e-mail;
-  GitHub release s instalátorem a checksumy (`releases/` zůstává mimo git).
-- Volitelně později: `WM_DEVICECHANGE` místo pollingu disků (fáze 2).
+- Veřejný GitHub release (`v1.0.0`) s instalátorem a SHA256.
+- Nápady na později: auto-start po připojení disku, plánovač, verzování smazaných souborů.
 
 ## [1.0.0] – 2026-10-11
 
