@@ -1,6 +1,6 @@
 # Data Backup Studio
 
-[English README](README.en.md)
+[English README](README.en.md) · [Instalátor v1.0.0](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.0)
 
 Offline desktopová aplikace pro Windows na zálohování složek z disků počítače na externí USB disky.
 

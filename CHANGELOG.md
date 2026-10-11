@@ -19,7 +19,6 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Počet úloh u skupiny skloňuje česky: **1 úloha**, **2 úlohy**, **10 úloh**.
 
 ### Další krok
-- Veřejný GitHub release (`v1.0.0`) s instalátorem a SHA256.
 - Nápady na později: auto-start po připojení disku, plánovač, verzování smazaných souborů.
 
 ## [1.0.0] – 2026-10-11
