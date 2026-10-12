@@ -284,7 +284,9 @@ export type RunDetail = {
 
 export type RunId = string;
 
-export type RunPhase = "copying" | "deleting" | "done" | "cancelled" | "failed";
+export type RunPhase = "copying" | "deleting" | "done" | "cancelled" | 
+/**  Run aborted before finishing (not used when only individual files fail). */
+"failed";
 
 export type RunProgress = {
 	phase: RunPhase,

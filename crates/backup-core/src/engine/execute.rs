@@ -40,6 +40,7 @@ pub enum RunPhase {
     Deleting,
     Done,
     Cancelled,
+    /// Run aborted before finishing (not used when only individual files fail).
     Failed,
 }
 
@@ -72,6 +73,10 @@ pub fn execute_plan(
     options: ExecuteOptions,
 ) -> CoreResult<RunResult> {
     fs::create_dir_all(long_path(target_root)).map_err(|e| CoreError::io(target_root, e))?;
+
+    if plan.actions.is_empty() {
+        on_log("kontrola  zdroj a cíl jsou shodné");
+    }
 
     let (copy_actions, delete_actions): (Vec<_>, Vec<_>) = plan
         .actions
@@ -268,11 +273,8 @@ pub fn execute_plan(
         done_actions += 1;
     }
 
-    result.phase = if result.errors.is_empty() {
-        RunPhase::Done
-    } else {
-        RunPhase::Failed
-    };
+    // Individual file I/O errors are collected in `errors`; the run still completed.
+    result.phase = RunPhase::Done;
     emit(
         result.phase,
         None,

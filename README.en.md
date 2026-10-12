@@ -1,6 +1,6 @@
 # Data Backup Studio
 
-[Česká verze](README.md) · [v1.0.0 installer](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.0)
+[Česká verze](README.md) · [v1.0.1 installer](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.1)
 
 Offline Windows desktop app for backing up folders from your PC to external USB drives.
 

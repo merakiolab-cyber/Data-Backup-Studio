@@ -61,7 +61,8 @@ impl HistoryStore {
             .map_err(|_| CoreError::Database("history database is locked".into()))
     }
 
-    /// Records a finished engine result (done / cancelled / failed with collected file errors).
+    /// Records a finished engine result (done / cancelled). File-level errors stay in `errors`
+    /// with status `Done`. Use [`Self::record_failure`] when the run never completed.
     pub fn record_result(
         &self,
         id: RunId,
@@ -387,5 +388,34 @@ mod tests {
             store.latest().expect("latest").map(|r| r.job_name),
             Some("Dokumenty".into())
         );
+    }
+
+    #[test]
+    fn file_errors_still_count_as_done() {
+        let dir = tempfile::tempdir().expect("temp dir");
+        let store = HistoryStore::open(dir.path()).expect("open");
+        let job = job("Fotky");
+        let id = RunId::new();
+        store
+            .record_result(
+                id,
+                &job,
+                1_000,
+                &RunResult {
+                    phase: RunPhase::Done,
+                    copied: 0,
+                    updated: 0,
+                    deleted: 0,
+                    dirs_created: 0,
+                    bytes_copied: 0,
+                    errors: vec!["I/O error at x: crc".into()],
+                },
+            )
+            .expect("record");
+        let summary = store.list(None).expect("list")[0].clone();
+        assert_eq!(summary.status, RunStatus::Done);
+        assert_eq!(summary.error_count, 1);
+        let detail = store.get(id).expect("detail");
+        assert_eq!(detail.errors.len(), 1);
     }
 }

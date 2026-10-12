@@ -14,6 +14,7 @@ const levelTone: Record<
   keyof Pick<DesignTokens, 'mint' | 'lemon' | 'peach' | 'muted' | 'lilac'>
 > = {
   fresh: 'mint',
+  current: 'mint',
   aging: 'lemon',
   stale: 'lilac',
   never: 'muted',
@@ -120,6 +121,8 @@ function FreshnessTableRow({ row }: { row: JobFreshnessRow }) {
     switch (level) {
       case 'never':
         return t.overview.freshnessNever;
+      case 'current':
+        return t.overview.freshnessCurrent;
       case 'fresh':
         return t.overview.freshnessFresh;
       case 'aging':

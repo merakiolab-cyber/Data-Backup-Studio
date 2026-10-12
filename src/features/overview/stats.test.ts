@@ -1,5 +1,5 @@
 import type { JobView, RegisteredVolumeView, RunSummary } from '@/lib/bindings';
-import { freshnessLevel, jobFreshnessRows } from './freshness';
+import { freshnessLevel, isNoChangeRun, jobFreshnessRows } from './freshness';
 import { backupStats, latestByJob, overviewStats, usedRatio } from './stats';
 
 const TB = 1024 ** 4;
@@ -110,8 +110,23 @@ describe('freshness', () => {
 
   it('classifies age and lists recent run dots', () => {
     expect(freshnessLevel(null, now)).toBe('never');
+    const verified = {
+      ...run('a', 0),
+      finishedAtMs: now - 2 * 86_400_000,
+      status: 'done' as const,
+      copied: 0,
+      updated: 0,
+      deleted: 0,
+      dirsCreated: 0,
+      errorCount: 0,
+    };
+    expect(isNoChangeRun(verified)).toBe(true);
+    expect(freshnessLevel(verified, now)).toBe('current');
     expect(
-      freshnessLevel({ ...run('a', 0), finishedAtMs: now - 2 * 86_400_000, status: 'done' }, now),
+      freshnessLevel(
+        { ...run('a', 0), finishedAtMs: now - 2 * 86_400_000, status: 'done', copied: 2 },
+        now,
+      ),
     ).toBe('fresh');
     expect(
       freshnessLevel({ ...run('a', 0), finishedAtMs: now - 10 * 86_400_000, status: 'done' }, now),

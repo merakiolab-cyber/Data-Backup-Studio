@@ -48,9 +48,10 @@ impl RunLog {
 
     pub fn finish(&mut self, result: &RunResult) {
         let status = match result.phase {
-            RunPhase::Done => "hotovo",
-            RunPhase::Cancelled => "zrušeno",
-            RunPhase::Failed | RunPhase::Copying | RunPhase::Deleting => "selhalo",
+            RunPhase::Done if result.errors.is_empty() => "hotovo".to_string(),
+            RunPhase::Done => format!("hotovo ({} souborů se nepodařilo)", result.errors.len()),
+            RunPhase::Cancelled => "zrušeno".into(),
+            RunPhase::Failed | RunPhase::Copying | RunPhase::Deleting => "selhalo".into(),
         };
         let _ = writeln!(
             self.writer,

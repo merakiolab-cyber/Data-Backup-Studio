@@ -57,6 +57,9 @@ export function RunJobDialog() {
         : fmt(t.run.startNamed, { name: jobName });
 
   const open = active && expanded;
+  const planUpToDate =
+    plan !== null &&
+    plan.summary.copy + plan.summary.update + plan.summary.delete + plan.summary.createDirs === 0;
 
   return (
     <Dialog
@@ -104,7 +107,11 @@ export function RunJobDialog() {
               onClick={startBackup}
               disabled={plan?.requiresDeleteConfirmation === true && !confirmDelete}
             >
-              {remaining > 0 ? t.run.startContinue : t.run.start}
+              {remaining > 0
+                ? t.run.startContinue
+                : planUpToDate
+                  ? t.run.confirmUpToDate
+                  : t.run.start}
             </Button>
           </>
         )}
@@ -168,7 +175,12 @@ function PlanBody({
         {fmt(t.run.previewHint, { mode: modeTitle })}
       </Typography>
       {nothing ? (
-        <Alert severity="success">{t.run.upToDate}</Alert>
+        <Alert severity="success">
+          {t.run.upToDate}
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {t.run.upToDateHint}
+          </Typography>
+        </Alert>
       ) : (
         <Box
           component="ul"
@@ -304,19 +316,25 @@ function ProgressBody({ progress }: { progress: RunProgress | null }) {
 }
 
 function ResultBody({ result }: { result: RunResult }) {
+  const { t } = useT();
   const severity =
     result.phase === 'done' ? 'success' : result.phase === 'cancelled' ? 'warning' : 'error';
-  const { t } = useT();
   const title =
     result.phase === 'done'
       ? t.run.finished
       : result.phase === 'cancelled'
         ? t.run.cancelled
         : t.run.failed;
+  const skipped = result.phase === 'done' && result.errors.length > 0;
+  const verified =
+    result.phase === 'done' &&
+    result.errors.length === 0 &&
+    result.copied + result.updated + result.deleted + result.dirsCreated === 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Alert severity={severity}>{title}</Alert>
+      <Alert severity={severity}>{verified ? t.history.noChange : title}</Alert>
+      {skipped && <Alert severity="warning">{t.run.finishedSomeSkipped}</Alert>}
       <Typography variant="body2">
         {fmt(t.run.result, {
           copied: result.copied,

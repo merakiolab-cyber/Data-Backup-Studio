@@ -1,11 +1,19 @@
 import type { JobView, RunSummary } from '@/lib/bindings';
+import { latestByJob } from './stats';
 
 const DAY_MS = 86_400_000;
 export const FRESH_DAYS = 7;
 export const STALE_DAYS = 30;
 const RECENT_DOTS = 5;
 
-export type FreshnessLevel = 'never' | 'fresh' | 'aging' | 'stale' | 'failed' | 'cancelled';
+export type FreshnessLevel =
+  | 'never'
+  | 'current'
+  | 'fresh'
+  | 'aging'
+  | 'stale'
+  | 'failed'
+  | 'cancelled';
 
 export interface JobFreshnessRow {
   view: JobView;
@@ -17,6 +25,18 @@ export interface JobFreshnessRow {
   recentRuns: Pick<RunSummary, 'id' | 'status'>[];
 }
 
+/** Successful run that only verified source/target are already in sync. */
+export function isNoChangeRun(run: RunSummary): boolean {
+  return (
+    run.status === 'done' &&
+    run.copied === 0 &&
+    run.updated === 0 &&
+    run.deleted === 0 &&
+    run.dirsCreated === 0 &&
+    run.errorCount === 0
+  );
+}
+
 export function freshnessLevel(run: RunSummary | null, now = Date.now()): FreshnessLevel {
   if (!run) {
     return 'never';
@@ -26,6 +46,9 @@ export function freshnessLevel(run: RunSummary | null, now = Date.now()): Freshn
   }
   if (run.status === 'cancelled') {
     return 'cancelled';
+  }
+  if (isNoChangeRun(run)) {
+    return 'current';
   }
   const days = (now - run.finishedAtMs) / DAY_MS;
   if (days <= FRESH_DAYS) {
@@ -50,6 +73,7 @@ export function jobFreshnessRows(
   runs: RunSummary[],
   now = Date.now(),
 ): JobFreshnessRow[] {
+  const latest = latestByJob(runs);
   const byJob = new Map<string, RunSummary[]>();
   for (const run of runs) {
     const list = byJob.get(run.jobId) ?? [];
@@ -61,7 +85,7 @@ export function jobFreshnessRows(
     .sort((a, b) => a.job.name.localeCompare(b.job.name, undefined, { sensitivity: 'base' }))
     .map((view) => {
       const jobRuns = byJob.get(view.job.id) ?? [];
-      const lastRun = jobRuns[0] ?? null;
+      const lastRun = latest.get(view.job.id) ?? null;
       return {
         view,
         lastRun,

@@ -91,6 +91,11 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
   const queueRef = useRef(queue);
   const planRef = useRef(plan);
   const confirmRef = useRef(confirmDelete);
+  /** After the first job in a multi queue starts, following jobs run without manual confirm. */
+  const chainRunsRef = useRef(false);
+  const runJobAtIndexRef = useRef<
+    (jobIndex: number, currentPlan: PlanView, confirmDeleteOverThreshold: boolean) => void
+  >(() => {});
   stageRef.current = stage;
   indexRef.current = index;
   queueRef.current = queue;
@@ -98,6 +103,117 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
   confirmRef.current = confirmDelete;
 
   const active = stage !== 'idle';
+
+  const invalidateRuns = useCallback(() => {
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+      queryClient.invalidateQueries({ queryKey: runsKey }),
+    ]);
+  }, [queryClient]);
+
+  const beginChainedJob = useCallback(
+    (nextIndex: number) => {
+      const next = queueRef.current[nextIndex];
+      if (!next) {
+        return;
+      }
+      setIndex(nextIndex);
+      setExpanded(false);
+      setStage('loading');
+      setPlan(null);
+      setConfirmDelete(false);
+      setResult(null);
+      setError(null);
+      setProgress(null);
+      void commands
+        .previewJob(next.id)
+        .then((raw) => {
+          if (stageRef.current === 'idle') {
+            return;
+          }
+          const nextPlan = unwrap(raw);
+          setPlan(nextPlan);
+          if (nextPlan.requiresDeleteConfirmation) {
+            setStage('plan');
+            setExpanded(true);
+            return;
+          }
+          runJobAtIndexRef.current(nextIndex, nextPlan, false);
+        })
+        .catch((err: unknown) => {
+          if (stageRef.current === 'idle') {
+            return;
+          }
+          setError(err instanceof Error ? err.message : String(err));
+          setStage('error');
+          setExpanded(true);
+          invalidateRuns();
+        });
+    },
+    [invalidateRuns],
+  );
+
+  const continueChainIfAny = useCallback(
+    (outcome: 'done' | 'error' | 'cancelled'): boolean => {
+      if (outcome === 'cancelled') {
+        chainRunsRef.current = false;
+        return false;
+      }
+      const nextIndex = indexRef.current + 1;
+      if (!chainRunsRef.current || nextIndex >= queueRef.current.length) {
+        return false;
+      }
+      beginChainedJob(nextIndex);
+      return true;
+    },
+    [beginChainedJob],
+  );
+
+  const runJobAtIndex = useCallback(
+    (jobIndex: number, _currentPlan: PlanView, confirmDeleteOverThreshold: boolean) => {
+      const job = queueRef.current[jobIndex];
+      if (!job) {
+        return;
+      }
+      setStage('running');
+      setError(null);
+      setProgress(null);
+      void commands
+        .runJob(job.id, confirmDeleteOverThreshold)
+        .then((raw) => {
+          if (stageRef.current === 'idle') {
+            return;
+          }
+          const outcome = unwrap(raw);
+          invalidateRuns();
+          if (outcome.phase === 'cancelled') {
+            chainRunsRef.current = false;
+            setResult(outcome);
+            setStage('done');
+            return;
+          }
+          if (continueChainIfAny('done')) {
+            return;
+          }
+          setResult(outcome);
+          setStage('done');
+        })
+        .catch((err: unknown) => {
+          if (stageRef.current === 'idle') {
+            return;
+          }
+          invalidateRuns();
+          if (continueChainIfAny('error')) {
+            return;
+          }
+          setError(err instanceof Error ? err.message : String(err));
+          setStage('error');
+        });
+    },
+    [continueChainIfAny, invalidateRuns],
+  );
+
+  runJobAtIndexRef.current = runJobAtIndex;
 
   const loadPreview = useCallback((jobId: JobId) => {
     setStage('loading');
@@ -164,6 +280,7 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
         if (!first) {
           return 'ignored';
         }
+        chainRunsRef.current = false;
         setQueue(items);
         setSkipped(skippedCount);
         setIndex(0);
@@ -179,7 +296,6 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
       if (skippedCount > 0) {
         setSkipped((value) => value + skippedCount);
       }
-      // Keep a running backup minimized; otherwise open the dialog for the queue.
       if (currentStage !== 'running' && currentStage !== 'loading') {
         setExpanded(true);
       }
@@ -197,7 +313,8 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
   );
 
   const startBackup = useCallback(() => {
-    const job = queueRef.current[indexRef.current];
+    const jobIndex = indexRef.current;
+    const job = queueRef.current[jobIndex];
     const currentPlan = planRef.current;
     if (!job || !currentPlan || stageRef.current !== 'plan') {
       return;
@@ -205,35 +322,12 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
     if (currentPlan.requiresDeleteConfirmation && !confirmRef.current) {
       return;
     }
+    if (queueRef.current.length > 1) {
+      chainRunsRef.current = true;
+    }
     const confirm = currentPlan.requiresDeleteConfirmation ? confirmRef.current : false;
-    setStage('running');
-    setError(null);
-    setProgress(null);
-    void commands
-      .runJob(job.id, confirm)
-      .then((raw) => {
-        if (stageRef.current === 'idle') {
-          return;
-        }
-        setResult(unwrap(raw));
-        setStage('done');
-        void Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['jobs'] }),
-          queryClient.invalidateQueries({ queryKey: runsKey }),
-        ]);
-      })
-      .catch((err: unknown) => {
-        if (stageRef.current === 'idle') {
-          return;
-        }
-        setError(err instanceof Error ? err.message : String(err));
-        setStage('error');
-        void Promise.all([
-          queryClient.invalidateQueries({ queryKey: ['jobs'] }),
-          queryClient.invalidateQueries({ queryKey: runsKey }),
-        ]);
-      });
-  }, [queryClient]);
+    runJobAtIndex(jobIndex, currentPlan, confirm);
+  }, [runJobAtIndex]);
 
   const cancelBackup = useCallback(() => {
     void commands.cancelRun().then((raw) => {
@@ -260,6 +354,7 @@ export function RunSessionProvider({ children }: { children: ReactNode }) {
       setExpanded(false);
       return;
     }
+    chainRunsRef.current = false;
     setStage('idle');
     setQueue([]);
     setSkipped(0);

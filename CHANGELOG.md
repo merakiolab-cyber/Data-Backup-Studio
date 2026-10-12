@@ -5,22 +5,25 @@ Sekce `[Unreleased]` slouÅ¾Ã­ jako pamÄ›Å¥ rozpracovanÃ© prÃ¡ce â€“ AI i ÄlovÄ›
 
 ## [Unreleased]
 
-### PÅ™idÃ¡no
-- Disky se obnovÃ­ hned po **pÅ™ipojenÃ­ / odpojenÃ­ USB** (`WM_DEVICECHANGE`). PeriodickÃ½ poll
-  kaÅ¾dÃ½ch 4 s odpadÃ¡. ADR 0012.
+### Další krok
+- Nápady na pozdìji: auto-start po pøipojení disku, plánovaè, verzování smazanıch souborù.
+
+## [1.0.1] – 2026-10-12
+
+### Pøidáno
+- Disky se obnoví hned po **pøipojení / odpojení USB** (`WM_DEVICECHANGE`). Periodickı poll
+  kadıch 4 s odpadá. ADR 0012.
 
 ### Opraveno
-- **VÃ½bÄ›r Ãºloh** reaguje na jedno kliknutÃ­. DÅ™Ã­ve i drobnÃ½ pohyb myÅ¡i spustil HTML5 drag
-  a klik se zahodil (kartu bylo potÅ™eba trefit dvakrÃ¡t aÅ¾ tÅ™ikrÃ¡t).
+- **Kontrola bez zmìn** po potvrzení náhledu se zapíše do historie; v Pøehledu je stav
+  **Aktuální, beze zmìn** místo „Ještì nezálohováno“.
+- **Dokonèená záloha s neèitelnımi soubory** se u nehlásí jako selhání celé operace.
+- **Vıbìr úloh** reaguje na jedno kliknutí (bez falešného dragu ve WebView2).
 
-### ZmÄ›nÄ›no
-- **Editor Ãºlohy** je na celou Å¡Ã­Å™ku (zdroj \| cÃ­l, pak reÅ¾im \| nÃ¡zev \| skupina, vylouÄenÃ­
-  dole). DlouhÃ© nÃ¡povÄ›dy u cÃ­le a vzorÅ¯ jsou za ikonou **?**.
-- PoÄet Ãºloh u skupiny skloÅˆuje Äesky: **1 Ãºloha**, **2 Ãºlohy**, **10 Ãºloh**.
-
-### DalÅ¡Ã­ krok
-- NÃ¡pady na pozdÄ›ji: auto-start po pÅ™ipojenÃ­ disku, plÃ¡novaÄ, verzovÃ¡nÃ­ smazanÃ½ch souborÅ¯.
-
+### Zmìnìno
+- **Fronta úloh** po prvním potvrzení bìí dál sama (vhodné pro noèní dávky).
+- **Editor úlohy** na celou šíøku; nápovìdy u cíle a vylouèení za ikonou **?**.
+- Skloòování poètu úloh ve skupinì (1 úloha / 2 úlohy / …).
 ## [1.0.0] â€“ 2026-10-11
 
 PrvnÃ­ stabilnÃ­ release po ostrÃ©m testu na skuteÄnÃ½ch discÃ­ch.
