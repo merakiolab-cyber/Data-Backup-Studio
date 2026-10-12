@@ -124,7 +124,7 @@ pub fn prune_logs(config_dir: &Path, keep: usize) -> CoreResult<()> {
             .unwrap_or(std::time::SystemTime::UNIX_EPOCH);
         files.push((modified, path));
     }
-    files.sort_by(|a, b| b.0.cmp(&a.0));
+    files.sort_by_key(|a| std::cmp::Reverse(a.0));
     for (_, path) in files.into_iter().skip(keep) {
         let _ = fs::remove_file(path);
     }

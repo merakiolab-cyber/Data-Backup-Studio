@@ -85,7 +85,7 @@ pub fn execute_plan(
 
     // Delete deepest paths first so files go before their parent dirs.
     let mut delete_actions = delete_actions;
-    delete_actions.sort_by(|a, b| b.rel_path.len().cmp(&a.rel_path.len()));
+    delete_actions.sort_by_key(|a| std::cmp::Reverse(a.rel_path.len()));
 
     let total_actions = u32::try_from(plan.actions.len()).unwrap_or(u32::MAX);
     let bytes_total = plan.summary.bytes_to_copy;

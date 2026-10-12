@@ -5,25 +5,27 @@ Sekce `[Unreleased]` slouÅ¾Ã­ jako pamÄ›Å¥ rozpracovanÃ© prÃ¡ce â€“ AI i ÄlovÄ›
 
 ## [Unreleased]
 
-### Další krok
-- Nápady na pozdìji: auto-start po pøipojení disku, plánovaè, verzování smazanıch souborù.
+### Opraveno
+- Clippy na Rust 1.99 (`sort_by` â†’ `sort_by_key`) â€“ CI `pnpm check` znovu projde.
 
-## [1.0.1] – 2026-10-12
+### DalÅ¡Ã­ krok
+- NÃ¡pady na pozdÄ›ji: auto-start po pÅ™ipojenÃ­ disku, plÃ¡novaÄ, verzovÃ¡nÃ­ smazanÃ½ch souborÅ¯.
 
-### Pøidáno
-- Disky se obnoví hned po **pøipojení / odpojení USB** (`WM_DEVICECHANGE`). Periodickı poll
-  kadıch 4 s odpadá. ADR 0012.
+## [1.0.1] â€“ 2026-10-12
+
+### PÅ™idÃ¡no
+- Disky se obnovÃ­ hned po **pÅ™ipojenÃ­ / odpojenÃ­ USB** (`WM_DEVICECHANGE`). PeriodickÃ½ poll kaÅ¾dÃ½ch 4 s odpadÃ¡. ADR 0012.
 
 ### Opraveno
-- **Kontrola bez zmìn** po potvrzení náhledu se zapíše do historie; v Pøehledu je stav
-  **Aktuální, beze zmìn** místo „Ještì nezálohováno“.
-- **Dokonèená záloha s neèitelnımi soubory** se u nehlásí jako selhání celé operace.
-- **Vıbìr úloh** reaguje na jedno kliknutí (bez falešného dragu ve WebView2).
+- **Kontrola bez zmÄ›n** po potvrzenÃ­ nÃ¡hledu se zapÃ­Å¡e do historie; v PÅ™ehledu je stav **AktuÃ¡lnÃ­, beze zmÄ›n**.
+- **DokonÄenÃ¡ zÃ¡loha s neÄitelnÃ½mi soubory** se uÅ¾ nehlÃ¡sÃ­ jako selhÃ¡nÃ­ celÃ© operace.
+- **VÃ½bÄ›r Ãºloh** reaguje na jedno kliknutÃ­ (bez faleÅ¡nÃ©ho dragu ve WebView2).
 
-### Zmìnìno
-- **Fronta úloh** po prvním potvrzení bìí dál sama (vhodné pro noèní dávky).
-- **Editor úlohy** na celou šíøku; nápovìdy u cíle a vylouèení za ikonou **?**.
-- Skloòování poètu úloh ve skupinì (1 úloha / 2 úlohy / …).
+### ZmÄ›nÄ›no
+- **Fronta Ãºloh** po prvnÃ­m potvrzenÃ­ bÄ›Å¾Ã­ dÃ¡l sama (vhodnÃ© pro noÄnÃ­ dÃ¡vky).
+- **Editor Ãºlohy** na celou Å¡Ã­Å™ku; nÃ¡povÄ›dy u cÃ­le a vylouÄenÃ­ za ikonou **?**.
+- SkloÅˆovÃ¡nÃ­ poÄtu Ãºloh ve skupinÄ› (1 Ãºloha / 2 Ãºlohy / â€¦).
+
 ## [1.0.0] â€“ 2026-10-11
 
 PrvnÃ­ stabilnÃ­ release po ostrÃ©m testu na skuteÄnÃ½ch discÃ­ch.
