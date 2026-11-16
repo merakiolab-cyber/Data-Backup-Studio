@@ -48,4 +48,4 @@ pnpm test           # frontend tests
 cargo test --workspace
 ```
 
-Portable `.exe` build: `pnpm build:portable` → `target/release/data-backup-studio.exe` (no installer, no admin rights). Data lives in `%APPDATA%pp.databackupstudio\`; create a `data` folder next to the exe to use it instead (fully portable mode). Release steps: `.cursor/skills/release-offline/SKILL.md`.
+Portable `.exe` build: `pnpm build:portable` → `target/release/data-backup-studio.exe` (no installer, no admin rights). Data lives in `%APPDATA%\app.databackupstudio\`; create a `data` folder next to the exe to use it instead (fully portable mode). Release steps: `.cursor/skills/release-offline/SKILL.md`.
