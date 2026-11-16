@@ -5,6 +5,11 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Další krok
+- Nápady na později: auto-start po připojení disku, plánovač, verzování smazaných souborů.
+
+## [1.1.0] – 2026-11-16
+
 ### Změněno
 - Screenshoty v README (`assets/abckup-preview.png`, `preview-jobs.png`, `preview-volumes.png`) nahrazeny/doplněny aktuálními obrazovkami Přehled, Úlohy a Disky s fiktivními demo daty (CZ i EN README); demo běhy mají realistické objemy dat.
 
@@ -16,9 +21,6 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 ### Opraveno
 - `pnpm audit` čistý: override `undici >=8.12.2` v `pnpm-workspace.yaml` (vývojová závislost přes vitest/jsdom).
 - Clippy na Rust 1.99 (`sort_by` → `sort_by_key`) – CI `pnpm check` znovu projde.
-
-### Další krok
-- Nápady na později: auto-start po připojení disku, plánovač, verzování smazaných souborů.
 
 ## [1.0.1] – 2026-10-12
 
