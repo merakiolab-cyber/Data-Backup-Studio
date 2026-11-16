@@ -1,6 +1,6 @@
 # Data Backup Studio
 
-[English README](README.en.md) · [Instalátor v1.0.1](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.1)
+[English README](README.en.md) · [Stažení v1.0.1](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.1)
 
 Offline desktopová aplikace pro Windows na zálohování složek z disků počítače na externí USB disky.
 
@@ -48,4 +48,4 @@ pnpm test           # testy frontendu
 cargo test --workspace
 ```
 
-Postup vytvoření offline instalátoru: `.cursor/skills/release-offline/SKILL.md`.
+Sestavení přenosného `.exe`: `pnpm build:portable` → `target/release/data-backup-studio.exe` (bez instalace, bez admin práv). Data jsou v `%APPDATA%pp.databackupstudio\`; pokud vedle exe vytvoříš složku `data`, použije se ta (plně přenosný režim). Postup vydání: `.cursor/skills/release-offline/SKILL.md`.

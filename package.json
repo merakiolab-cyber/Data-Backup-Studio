@@ -1,13 +1,13 @@
 {
   "name": "data-backup-studio",
   "private": true,
-  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "build:portable": "tauri build --no-bundle",
     "test": "vitest run",
     "check": "biome check . && tsc --noEmit && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings",
     "format": "biome check --write . && cargo fmt --all"

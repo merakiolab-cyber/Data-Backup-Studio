@@ -8,6 +8,11 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 ### Změněno
 - Screenshoty v README (`assets/abckup-preview.png`, `preview-jobs.png`, `preview-volumes.png`) nahrazeny/doplněny aktuálními obrazovkami Přehled, Úlohy a Disky s fiktivními demo daty (CZ i EN README); demo běhy mají realistické objemy dat.
 
+### Změněno – distribuce
+- Jediný výstup je portable `.exe`: `pnpm build:portable` (`tauri build --no-bundle`). NSIS instalátor a offline WebView2 odstraněny z `tauri.conf.json`, CI i skillu `release-offline`.
+- Verze má jediný zdroj pravdy – `[workspace.package]` v `Cargo.toml` (z `package.json` a `tauri.conf.json` odstraněna).
+- Složka `data` vedle exe přepíše umístění dat z `%APPDATA%` (přenosný režim). Manifest explicitně `asInvoker`.
+
 ### Opraveno
 - Clippy na Rust 1.99 (`sort_by` → `sort_by_key`) – CI `pnpm check` znovu projde.
 

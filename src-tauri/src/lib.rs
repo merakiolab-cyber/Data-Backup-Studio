@@ -55,6 +55,15 @@ fn export_bindings(builder: &Builder<tauri::Wry>) -> Result<(), String> {
         .map_err(|err| err.to_string())
 }
 
+/// Portable mode: a `data` folder next to the executable takes precedence over `%APPDATA%`.
+fn resolve_data_dir(default_dir: std::path::PathBuf) -> std::path::PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.join("data")))
+        .filter(|dir| dir.is_dir())
+        .unwrap_or(default_dir)
+}
+
 pub fn run() {
     let builder = specta_builder();
 
@@ -68,7 +77,7 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
-            let config_dir = app.path().app_config_dir()?;
+            let config_dir = resolve_data_dir(app.path().app_config_dir()?);
             app.manage(AppState::new(
                 config_dir.clone(),
                 ConfigStore::open(&config_dir)?,

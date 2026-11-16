@@ -1,6 +1,6 @@
 # Data Backup Studio
 
-[Česká verze](README.md) · [v1.0.1 installer](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.1)
+[Česká verze](README.md) · [v1.0.1 download](https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.1)
 
 Offline Windows desktop app for backing up folders from your PC to external USB drives.
 
@@ -48,4 +48,4 @@ pnpm test           # frontend tests
 cargo test --workspace
 ```
 
-Offline installer build: `.cursor/skills/release-offline/SKILL.md`.
+Portable `.exe` build: `pnpm build:portable` → `target/release/data-backup-studio.exe` (no installer, no admin rights). Data lives in `%APPDATA%pp.databackupstudio\`; create a `data` folder next to the exe to use it instead (fully portable mode). Release steps: `.cursor/skills/release-offline/SKILL.md`.

@@ -15,6 +15,9 @@ src-tauri/gen/
 # Release artefakty (archivují se mimo git)
 releases/
 
+*.pdb
+/data/
+
 # Logy a lokální data
 *.log
 *.db

@@ -39,7 +39,7 @@ jednotky** – disky se identifikují podle vlastní identity, takže změna `F:
 | Lint / formát | `clippy`, `rustfmt`, **Biome** (TS) | Rychlé, jeden nástroj pro TS lint + format |
 | Testy | `cargo test` (+ `tempfile`), Vitest + Testing Library | Engine testován na reálném FS v dočasných složkách |
 | Balíčkovač | pnpm (lockfile) | Reprodukovatelné buildy |
-| Instalátor | NSIS (+ přibalený offline WebView2) a portable `.exe` | Instalovatelné i za 10 let bez internetu |
+| Distribuce | Samostatný portable `.exe` (`pnpm build:portable`) | Bez instalace a admin práv; WebView2 je součástí Windows 11 |
 
 ### Proč ne webová aplikace v prohlížeči
 Prohlížeč nesmí volně číst/zapisovat po disku ani zjistit sériové číslo svazku. Potřebovali bychom
@@ -202,8 +202,8 @@ Průběh jedné úlohy:
 
 ## 7. Offline navždy
 
-- Release build = NSIS instalátor s přibaleným offline WebView2 + portable `.exe`.
-- Instalátor se archivuje v `releases/` (mimo git) a doporučeně i na každém zálohovacím disku.
+- Release build = portable `.exe` (`pnpm build:portable`, ~8 MB). Data: `%APPDATA%`, nebo složka `data` vedle exe.
+- Exe se archivuje v `releases/` (mimo git) a doporučeně i na každém zálohovacím disku.
 - Konfigurace je v `%APPDATA%\app.databackupstudio\config.json` (+ `config.json.bak` s předchozí
   verzí) a půjde exportovat do souboru.
 - Volitelně `cargo vendor` + pnpm store pro build bez internetu (viz skill `release-offline`).

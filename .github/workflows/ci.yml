@@ -77,19 +77,12 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Tauri build (NSIS + portable)
-        run: pnpm tauri build
-
-      - name: Upload NSIS installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: src-tauri/target/release/bundle/nsis/*.exe
-          if-no-files-found: error
+      - name: Build portable exe
+        run: pnpm build:portable
 
       - name: Upload portable exe
         uses: actions/upload-artifact@v4
         with:
           name: windows-portable
-          path: src-tauri/target/release/data-backup-studio.exe
+          path: target/release/data-backup-studio.exe
           if-no-files-found: error
