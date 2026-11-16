@@ -14,6 +14,7 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 - Složka `data` vedle exe přepíše umístění dat z `%APPDATA%` (přenosný režim). Manifest explicitně `asInvoker`.
 
 ### Opraveno
+- `pnpm audit` čistý: override `undici >=8.12.2` v `pnpm-workspace.yaml` (vývojová závislost přes vitest/jsdom).
 - Clippy na Rust 1.99 (`sort_by` → `sort_by_key`) – CI `pnpm check` znovu projde.
 
 ### Další krok
