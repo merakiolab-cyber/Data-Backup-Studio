@@ -250,7 +250,7 @@ let runs: RunSummary[] = [
     updated: 1,
     deleted: 0,
     dirsCreated: 0,
-    bytesCopied: 12_000_000,
+    bytesCopied: 12.4 * GB,
     errorCount: 0,
   }),
   demoRun({
@@ -280,7 +280,7 @@ let runs: RunSummary[] = [
     updated: 0,
     deleted: 0,
     dirsCreated: 0,
-    bytesCopied: 2_000_000,
+    bytesCopied: 2.1 * GB,
     errorCount: 0,
   }),
 ];

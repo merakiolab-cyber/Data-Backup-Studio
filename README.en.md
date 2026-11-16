@@ -11,6 +11,15 @@ Offline Windows desktop app for backing up folders from your PC to external USB 
 
 ![Data Backup Studio overview: volume and job tiles, statistics card](assets/abckup-preview.png)
 
+<details>
+<summary>More screens</summary>
+
+![Jobs: backup cards grouped by target disk; sample data](assets/preview-jobs.png)
+
+![Disks: registered target disks, external and internal disks; sample data](assets/preview-volumes.png)
+
+</details>
+
 ## Getting started
 
 1. **Register a target USB disk** on the Disks screen. A hidden marker is written to the disk root so the app recognizes it after letter changes.

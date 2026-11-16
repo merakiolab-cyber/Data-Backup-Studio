@@ -6,7 +6,7 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 ## [Unreleased]
 
 ### Změněno
-- Screenshot v README (`assets/abckup-preview.png`) nahrazen aktuálním Přehledem s fiktivními demo daty.
+- Screenshoty v README (`assets/abckup-preview.png`, `preview-jobs.png`, `preview-volumes.png`) nahrazeny/doplněny aktuálními obrazovkami Přehled, Úlohy a Disky s fiktivními demo daty (CZ i EN README); demo běhy mají realistické objemy dat.
 
 ### Opraveno
 - Clippy na Rust 1.99 (`sort_by` → `sort_by_key`) – CI `pnpm check` znovu projde.

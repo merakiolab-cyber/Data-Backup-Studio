@@ -11,6 +11,15 @@ Offline desktopová aplikace pro Windows na zálohování složek z disků poč�
 
 ![Přehled Data Backup Studio: dlaždice, stáří záloh a statistiky; ukázková data](assets/abckup-preview.png)
 
+<details>
+<summary>Další obrazovky</summary>
+
+![Úlohy: karty záloh seskupené podle cílového disku; ukázková data](assets/preview-jobs.png)
+
+![Disky: registrované cílové disky, externí a interní disky; ukázková data](assets/preview-volumes.png)
+
+</details>
+
 ## Jak začít
 
 1. **Zaregistruj cílový USB disk** na obrazovce Disky. Do kořene se zapíše skrytá značka, podle které disk poznáme i po změně písmene.
