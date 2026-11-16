@@ -74,7 +74,7 @@ Až bude aplikace hotová a odladěná.
 - [x] README v angličtině (`README.en.md`)
 - [x] GitHub Actions: `pnpm check`, testy, `cargo test --workspace`; na `main`/`master` i `pnpm tauri build` (artefakty)
 - [x] Release na GitHubu s instalátorem a SHA256
-  (https://github.com/merakiolab-cyber/data-backup-studio/releases/tag/v1.0.0)
+  (https://github.com/merakiolab-cyber/Data-Backup-Studio/releases/tag/v1.0.0)
 
 ## Nápady na později
 - Automatické spuštění po připojení disku
