@@ -26,6 +26,8 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::volumes::confirm_volume,
             commands::volumes::reorder_volumes,
             commands::jobs::list_jobs,
+            commands::jobs::get_job_size,
+            commands::jobs::measure_folder,
             commands::jobs::locate_folder,
             commands::jobs::create_job,
             commands::jobs::update_job,

@@ -19,6 +19,40 @@ pub async fn list_jobs(state: State<'_, AppState>) -> AppResult<JobsOverview> {
     .await
 }
 
+#[tauri::command]
+#[specta::specta]
+pub async fn get_job_size(
+    state: State<'_, AppState>,
+    id: JobId,
+) -> AppResult<Option<jobs::JobSize>> {
+    let state = state.inner().clone();
+    blocking(state.locale(), move || {
+        let live = state.list_live()?;
+        let store = state.config()?;
+        Ok(jobs::size(store.config(), &live, id)?)
+    })
+    .await
+}
+
+/// Measures a folder picked in the editor (before the job exists) so the user can see
+/// whether it fits on the target disk. Read-only; the path is never stored.
+#[tauri::command]
+#[specta::specta]
+pub async fn measure_folder(
+    state: State<'_, AppState>,
+    path: String,
+    excludes: Vec<String>,
+) -> AppResult<jobs::JobSize> {
+    let state = state.inner().clone();
+    blocking(state.locale(), move || {
+        Ok(jobs::measure_folder(
+            std::path::Path::new(&path),
+            &excludes,
+        )?)
+    })
+    .await
+}
+
 /// `path` comes from the folder dialog; it is resolved to a volume + relative path and never stored.
 #[tauri::command]
 #[specta::specta]

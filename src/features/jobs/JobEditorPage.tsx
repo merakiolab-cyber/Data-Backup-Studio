@@ -13,6 +13,7 @@ import {
   CircleHelp,
   Folder,
   FolderOpen,
+  FolderPlus,
   FolderSearch,
   HardDrive,
   Save,
@@ -26,10 +27,11 @@ import { IconBubble } from '@/components/IconBubble';
 import { Page } from '@/components/Page';
 import { useVolumes } from '@/features/volumes/api';
 import type { JobId, LocatedFolder, RegisteredVolumeView } from '@/lib/bindings';
-import { driveLabel } from '@/lib/format';
+import { driveLabel, formatBytes } from '@/lib/format';
 import { fmt, useT } from '@/lib/i18n';
-import { pickFolder, useJobs, useSaveJob, useSetJobsGroup } from './api';
+import { pickFolder, useCreateJobGroup, useJobs, useSaveJob, useSetJobsGroup } from './api';
 import { ExcludesField } from './components/ExcludesField';
+import { FitCheck } from './components/FitCheck';
 import { FormBlock } from './components/FormBlock';
 import { ModePicker } from './components/ModePicker';
 import {
@@ -41,6 +43,9 @@ import {
   withSource,
 } from './jobForm';
 import { displayLocation } from './labels';
+
+/** Sentinel `<select>` value for "create a new group"; real group ids are UUIDs. */
+const NEW_GROUP = '__new-group__';
 
 export function JobEditorPage() {
   const { t } = useT();
@@ -99,13 +104,21 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
   const jobs = useJobs();
   const save = useSaveJob();
   const setGroup = useSetJobsGroup();
+  const createGroup = useCreateJobGroup();
   const groups = jobs.data?.groups ?? [];
   const [form, setForm] = useState(initial);
   const [pickError, setPickError] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  /** `null` = no new group; otherwise the name typed for a group created together with the job. */
+  const [newGroupName, setNewGroupName] = useState<string | null>(null);
   const targets = volumes.data?.registered ?? [];
   const target = targets.find((t) => t.volume.id === form.targetVolumeId);
   const input = toInput(form);
+  const newGroupTrimmed = newGroupName?.trim() ?? null;
+  const newGroupInvalid =
+    newGroupTrimmed !== null &&
+    (newGroupTrimmed.length === 0 || newGroupTrimmed.length > MAX_NAME_LENGTH);
+  const busy = save.isPending || setGroup.isPending || createGroup.isPending;
 
   const pick = async (apply: (folder: LocatedFolder) => void, defaultPath?: string) => {
     setPickError(null);
@@ -136,11 +149,22 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (input && !save.isPending && !setGroup.isPending) {
+    if (input && !busy && !newGroupInvalid) {
       save.mutate(
         { id: jobId, input },
         {
           onSuccess: (job) => {
+            if (newGroupTrimmed !== null) {
+              createGroup.mutate(
+                { name: newGroupTrimmed, jobIds: [job.id] },
+                {
+                  onSuccess: () => navigate('/ulohy'),
+                  // The job is already saved; reopen it so the group can be retried without a duplicate.
+                  onError: () => navigate(`/ulohy/${job.id}`),
+                },
+              );
+              return;
+            }
             if ((form.groupId ?? null) === initial.groupId) {
               navigate('/ulohy');
               return;
@@ -280,6 +304,12 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
         </FormBlock>
       </Box>
 
+      <FitCheck
+        sourcePath={form.source?.path ?? null}
+        excludes={form.excludes}
+        targetFreeBytes={target?.live ? target.live.freeBytes : null}
+      />
+
       <Box
         sx={{
           display: 'grid',
@@ -288,7 +318,7 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
           alignItems: 'stretch',
           gridTemplateColumns: {
             xs: '1fr',
-            md: groups.length > 0 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
+            md: 'repeat(3, minmax(0, 1fr))',
           },
         }}
       >
@@ -309,45 +339,61 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
           />
         </FormBlock>
 
-        {groups.length > 0 && (
-          <FormBlock step={5} title={t.editor.stepGroup} description={t.editor.stepGroupHint}>
-            <TextField
-              select
-              fullWidth
-              label={t.editor.stepGroup}
-              value={form.groupId ?? ''}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  groupId: event.target.value === '' ? null : event.target.value,
-                }))
+        <FormBlock step={5} title={t.editor.stepGroup} description={t.editor.stepGroupHint}>
+          <TextField
+            select
+            fullWidth
+            label={t.editor.stepGroup}
+            value={newGroupName !== null ? NEW_GROUP : (form.groupId ?? '')}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value === NEW_GROUP) {
+                setNewGroupName((current) => current ?? target?.volume.name ?? '');
+                return;
               }
-            >
-              <MenuItem value="">{t.jobs.ungrouped}</MenuItem>
-              {groups.map((group) => (
-                <MenuItem key={group.id} value={group.id}>
-                  {group.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </FormBlock>
-        )}
+              setNewGroupName(null);
+              setForm((current) => ({ ...current, groupId: value === '' ? null : value }));
+            }}
+          >
+            <MenuItem value="">{t.jobs.ungrouped}</MenuItem>
+            {groups.map((group) => (
+              <MenuItem key={group.id} value={group.id}>
+                {group.name}
+              </MenuItem>
+            ))}
+            <MenuItem value={NEW_GROUP}>
+              <FolderPlus size={16} style={{ marginRight: 8, flexShrink: 0 }} />
+              {t.editor.newGroup}
+            </MenuItem>
+          </TextField>
+          {newGroupName !== null && (
+            <TextField
+              autoFocus
+              fullWidth
+              label={t.editor.newGroupName}
+              value={newGroupName}
+              onChange={(event) => setNewGroupName(event.target.value)}
+              error={newGroupInvalid && newGroupName.length > 0}
+              helperText={t.jobs.groupNameHint}
+              sx={{ mt: 2 }}
+            />
+          )}
+        </FormBlock>
       </Box>
 
-      <FormBlock
-        step={groups.length > 0 ? 6 : 5}
-        title={t.editor.stepExcludes}
-        description={t.editor.stepExcludesHint}
-      >
+      <FormBlock step={6} title={t.editor.stepExcludes} description={t.editor.stepExcludesHint}>
         <ExcludesField
           value={form.excludes}
           onChange={(excludes) => setForm((f) => ({ ...f, excludes }))}
         />
       </FormBlock>
 
-      {(pickError ?? save.error ?? setGroup.error) && (
+      {(pickError ?? save.error ?? setGroup.error ?? createGroup.error) && (
         <Alert severity="error">
-          {pickError ?? save.error?.message ?? setGroup.error?.message}
+          {pickError ??
+            save.error?.message ??
+            setGroup.error?.message ??
+            createGroup.error?.message}
         </Alert>
       )}
 
@@ -357,8 +403,8 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
           type="submit"
           variant="contained"
           startIcon={<Save size={18} />}
-          disabled={!input}
-          loading={save.isPending || setGroup.isPending}
+          disabled={!input || newGroupInvalid}
+          loading={busy}
         >
           {jobId ? t.editor.save : t.editor.create}
         </Button>
@@ -369,10 +415,10 @@ function JobEditor({ jobId, initial }: { jobId: JobId | null; initial: JobForm }
 
 function targetState(
   { status, live }: RegisteredVolumeView,
-  t: { editor: { needsCheck: string; disconnected: string } },
+  t: { editor: { needsCheck: string; disconnected: string; freeSpace: string } },
 ): string {
   if (status.state === 'connected' && live) {
-    return driveLabel(live.mountPoint);
+    return `${driveLabel(live.mountPoint)} · ${fmt(t.editor.freeSpace, { free: formatBytes(live.freeBytes) })}`;
   }
   return status.state === 'needsConfirmation' ? t.editor.needsCheck : t.editor.disconnected;
 }

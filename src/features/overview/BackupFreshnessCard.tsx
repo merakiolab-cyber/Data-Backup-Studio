@@ -1,10 +1,14 @@
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { Clock3 } from 'lucide-react';
+import { Clock3, Play } from 'lucide-react';
 import { enter, hoverLift } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { DesignTokens } from '@/app/theme/tokens';
 import { statusTone } from '@/features/history/labels';
+import { isJobReady } from '@/features/jobs/labels';
+import { useRunSession } from '@/features/jobs/runSession';
 import { formatWhen } from '@/lib/format';
 import { fmt, useT } from '@/lib/i18n';
 import type { FreshnessLevel, JobFreshnessRow } from './freshness';
@@ -81,6 +85,10 @@ export function BackupFreshnessCard({ rows }: { rows: JobFreshnessRow[] }) {
             borderBottom: 1,
             borderColor: 'divider',
           },
+          '& th:last-of-type, & td:last-of-type': {
+            textAlign: 'right',
+            pr: 0,
+          },
           '& td': {
             py: 1.25,
             pr: 2,
@@ -100,6 +108,7 @@ export function BackupFreshnessCard({ rows }: { rows: JobFreshnessRow[] }) {
             <th scope="col" aria-label={t.overview.freshnessColRecent}>
               {t.overview.freshnessColRecent}
             </th>
+            <th scope="col">{t.overview.freshnessColAction}</th>
           </tr>
         </thead>
         <tbody>
@@ -114,8 +123,10 @@ export function BackupFreshnessCard({ rows }: { rows: JobFreshnessRow[] }) {
 
 function FreshnessTableRow({ row }: { row: JobFreshnessRow }) {
   const { t } = useT();
+  const { enqueue } = useRunSession();
   const { view, lastRun, level, daysSince, recentRuns } = row;
   const tone = levelTone[level];
+  const canRun = isJobReady(view);
 
   const ageLabel = (() => {
     switch (level) {
@@ -193,6 +204,39 @@ function FreshnessTableRow({ row }: { row: JobFreshnessRow }) {
             ))
           )}
         </Box>
+      </td>
+      <td>
+        <Tooltip title={canRun ? t.jobs.runHint : t.jobs.runDisabled}>
+          <span>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<Play size={14} />}
+              disabled={!canRun}
+              onClick={() => enqueue([{ id: view.job.id, name: view.job.name }])}
+              aria-label={fmt(t.overview.runJobNamed, { name: view.job.name })}
+              sx={(theme) => ({
+                whiteSpace: 'nowrap',
+                minHeight: 32,
+                px: 1.5,
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                ...(canRun && {
+                  bgcolor: ds(theme).muted,
+                  color: ds(theme).ink,
+                  border: 'none',
+                  '&:hover': {
+                    bgcolor: ds(theme).mint,
+                    color: ds(theme).onAccent,
+                    border: 'none',
+                  },
+                }),
+              })}
+            >
+              {t.jobs.run}
+            </Button>
+          </span>
+        </Tooltip>
       </td>
     </tr>
   );

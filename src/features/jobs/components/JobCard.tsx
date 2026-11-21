@@ -22,15 +22,17 @@ import {
 } from 'lucide-react';
 import { type ReactNode, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { duration, ease, hoverLift, pulseRing } from '@/app/theme/motion';
+import { duration, ease, hoverLift } from '@/app/theme/motion';
 import { ds } from '@/app/theme/theme';
 import type { DesignTokens } from '@/app/theme/tokens';
 import { IconBubble } from '@/components/IconBubble';
 import { statusLabels } from '@/features/history/labels';
+import type { FreshnessLevel } from '@/features/overview/freshness';
+import { daysSinceRun, freshnessLevel, needsBackup } from '@/features/overview/freshness';
 import type { EndpointView, JobId, JobView, Location, RunSummary } from '@/lib/bindings';
-import { formatWhen } from '@/lib/format';
-import { fmt, useT } from '@/lib/i18n';
-import { openLocation, useDeleteJob } from '../api';
+import { formatBytes, formatWhen } from '@/lib/format';
+import { fmt, plural, useT } from '@/lib/i18n';
+import { openLocation, useDeleteJob, useJobSize } from '../api';
 import { encodeJobDrag } from '../groupLayout';
 import { displayLocation, isJobReady, modeLabels } from '../labels';
 import { useRunSession } from '../runSession';
@@ -39,7 +41,7 @@ import { DeleteJobDialog } from './DeleteJobDialog';
 interface Readiness {
   icon: ReactNode;
   label: string;
-  tone: keyof Pick<DesignTokens, 'mint' | 'lemon' | 'muted'>;
+  tone: keyof Pick<DesignTokens, 'mint' | 'lemon' | 'peach' | 'muted'>;
 }
 
 /** Short state for the pill; which disk it concerns is visible in the endpoint rows above. */
@@ -71,8 +73,10 @@ export function JobCard({
   dragIds?: JobId[] | undefined;
   lastRun?: RunSummary | null;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const { job } = view;
+  const sourceConnected = view.source.status.state === 'connected';
+  const size = useJobSize(job.id, sourceConnected);
   const navigate = useNavigate();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -86,8 +90,17 @@ export function JobCard({
     diskCheck: t.jobs.diskCheck,
   });
   const canRun = isJobReady(view);
-  const modes = modeLabels(t);
   const statuses = statusLabels(t);
+  const level = freshnessLevel(lastRun);
+  const days = daysSinceRun(lastRun);
+  const due = needsBackup(level, days);
+  const backup = backupState(level, due, t.jobs);
+  const lastRunText = lastRun
+    ? fmt(t.jobs.lastRunLabel, {
+        when: `${statuses[lastRun.status]} ${formatWhen(lastRun.finishedAtMs)} · ${ageText(days ?? 0, t.jobs)}`,
+      })
+    : null;
+  const modes = modeLabels(t);
   const selectable = onSelectedChange !== undefined;
 
   const interactive = (target: EventTarget | null) =>
@@ -203,8 +216,17 @@ export function JobCard({
             {modes[job.mode].title}
             {job.excludes.length > 0 &&
               ` · ${fmt(t.jobs.skipPatterns, { count: job.excludes.length })}`}
-            {lastRun ? ` · ${statuses[lastRun.status]} ${formatWhen(lastRun.finishedAtMs)}` : ''}
           </Typography>
+          {sourceConnected && (size.isPending || size.data) && (
+            <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.25 }}>
+              {size.data
+                ? fmt(t.jobs.jobSize, {
+                    size: formatBytes(size.data.totalBytes, locale),
+                    files: plural(locale, size.data.fileCount, t.jobs.fileCount),
+                  })
+                : t.jobs.sizeCalculating}
+            </Typography>
+          )}
         </Box>
         <IconButton
           aria-label={fmt(t.jobs.options, { name: job.name })}
@@ -235,57 +257,69 @@ export function JobCard({
         />
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 'auto', pt: 0.5 }}>
-        <Box
-          sx={(theme) => ({
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.75,
-            minWidth: 0,
-            height: 34,
-            px: 1.5,
-            borderRadius: '999px',
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-            bgcolor: ds(theme)[state.tone],
-            color: state.tone === 'muted' ? ds(theme).inkMuted : ds(theme).onAccent,
-          })}
-        >
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 'auto', pt: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box
-            component="span"
+            role="status"
+            sx={(theme) => ({
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.75,
+              minWidth: 0,
+              height: 38,
+              px: 1.75,
+              borderRadius: '999px',
+              fontSize: '0.9375rem',
+              fontWeight: 700,
+              bgcolor: ds(theme)[backup.tone],
+              color: backup.tone === 'muted' ? ds(theme).inkMuted : ds(theme).onAccent,
+            })}
+          >
+            <Box component="span" sx={{ display: 'flex', flexShrink: 0 }}>
+              {backup.icon}
+            </Box>
+            <Box
+              component="span"
+              sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {backup.label}
+            </Box>
+          </Box>
+          <Box sx={{ flex: 1 }} />
+          <Tooltip title={canRun ? t.jobs.runHint : t.jobs.runDisabled}>
+            <span>
+              <Button
+                variant="contained"
+                startIcon={<Play size={16} />}
+                disabled={!canRun}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  enqueue([{ id: job.id, name: job.name }]);
+                }}
+              >
+                {t.jobs.run}
+              </Button>
+            </span>
+          </Tooltip>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <Typography variant="body2" color="text.secondary" noWrap sx={{ flex: 1, minWidth: 0 }}>
+            {lastRunText ?? ''}
+          </Typography>
+          <Box
             sx={{
-              display: 'flex',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.5,
               flexShrink: 0,
-              borderRadius: '50%',
-              animation:
-                state.tone === 'mint' ? `${pulseRing} 2.4s ${ease.standard} infinite` : 'none',
+              color: 'text.secondary',
+              fontSize: '0.75rem',
             }}
           >
             {state.icon}
-          </Box>
-          <Box
-            component="span"
-            sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
             {state.label}
           </Box>
         </Box>
-        <Box sx={{ flex: 1 }} />
-        <Tooltip title={canRun ? t.jobs.runHint : t.jobs.runDisabled}>
-          <span>
-            <Button
-              variant="contained"
-              startIcon={<Play size={16} />}
-              disabled={!canRun}
-              onClick={(event) => {
-                event.stopPropagation();
-                enqueue([{ id: job.id, name: job.name }]);
-              }}
-            >
-              {t.jobs.run}
-            </Button>
-          </span>
-        </Tooltip>
       </Box>
 
       <Menu
@@ -324,6 +358,50 @@ export function JobCard({
       />
     </Box>
   );
+}
+
+function ageText(
+  days: number,
+  l: { ageToday: string; ageYesterday: string; ageDays: string; ageMonths: string },
+): string {
+  if (days <= 0) {
+    return l.ageToday;
+  }
+  if (days === 1) {
+    return l.ageYesterday;
+  }
+  if (days <= 60) {
+    return fmt(l.ageDays, { n: days });
+  }
+  return fmt(l.ageMonths, { n: Math.floor(days / 30) });
+}
+
+/** The main verdict on the card: is the backup recent enough, or does it need to be run? */
+function backupState(
+  level: FreshnessLevel,
+  due: boolean,
+  l: {
+    backupOk: string;
+    backupDue: string;
+    backupNever: string;
+    backupFailed: string;
+    backupCancelled: string;
+  },
+): Readiness {
+  const ok = <CircleCheck size={18} />;
+  const warn = <CircleAlert size={18} />;
+  if (level === 'never') {
+    return { icon: warn, label: l.backupNever, tone: 'peach' };
+  }
+  if (level === 'failed') {
+    return { icon: warn, label: l.backupFailed, tone: 'peach' };
+  }
+  if (level === 'cancelled') {
+    return { icon: warn, label: l.backupCancelled, tone: 'lemon' };
+  }
+  return due
+    ? { icon: warn, label: l.backupDue, tone: 'peach' }
+    : { icon: ok, label: l.backupOk, tone: 'mint' };
 }
 
 function Endpoint({

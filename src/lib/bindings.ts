@@ -18,6 +18,15 @@ export const commands = {
 	confirmVolume: (id: VolumeId) => typedError<null, AppError>(__TAURI_INVOKE("confirm_volume", { id })),
 	reorderVolumes: (orderedIds: VolumeId[]) => typedError<null, AppError>(__TAURI_INVOKE("reorder_volumes", { orderedIds })),
 	listJobs: () => typedError<JobsOverview_Serialize, AppError>(__TAURI_INVOKE("list_jobs")),
+	getJobSize: (id: JobId) => typedError<{
+	totalBytes: number,
+	fileCount: number,
+} | null, AppError>(__TAURI_INVOKE("get_job_size", { id })),
+	/**
+	 *  Measures a folder picked in the editor (before the job exists) so the user can see
+	 *  whether it fits on the target disk. Read-only; the path is never stored.
+	 */
+	measureFolder: (path: string, excludes: string[]) => typedError<JobSize, AppError>(__TAURI_INVOKE("measure_folder", { path, excludes })),
 	/**  `path` comes from the folder dialog; it is resolved to a volume + relative path and never stored. */
 	locateFolder: (path: string) => typedError<LocatedFolder, AppError>(__TAURI_INVOKE("locate_folder", { path })),
 	createJob: (input: JobInput) => typedError<Job_Serialize, AppError>(__TAURI_INVOKE("create_job", { input })),
@@ -121,6 +130,12 @@ export type JobInput = {
 	target: Location,
 	mode: BackupMode,
 	excludes: string[],
+};
+
+/**  Calculated size and file count of a job's source folder. */
+export type JobSize = {
+	totalBytes: number,
+	fileCount: number,
 };
 
 export type JobView = JobView_Serialize | JobView_Deserialize;

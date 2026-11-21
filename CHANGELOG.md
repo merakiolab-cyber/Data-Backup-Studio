@@ -5,6 +5,18 @@ Sekce `[Unreleased]` slouží jako paměť rozpracované práce – AI i člově
 
 ## [Unreleased]
 
+### Přidáno
+- **Spuštění úlohy z Přehledu**: V tabulce stáří záloh na úvodní obrazovce má každá úloha tlačítko **Spustit**. Připravené úlohy lze spustit přímo z přehledu bez nutnosti přecházet do sekce Úloh.
+- **Velikost úlohy**: Karta úlohy na stránce Úlohy zobrazuje velikost zdrojové složky a počet souborů (po zohlednění vyloučení). Počítá se na pozadí přes `get_job_size` a cachuje 5 min; u odpojeného zdroje se neukazuje.
+- **Vejde se na disk?**: V editoru úlohy panel porovná velikost vybrané zdrojové složky (po vyloučeních; příkaz `measure_folder`) s volným místem cílového disku a ukáže, kolik zbyde / chybí. V nabídce disků je u každého vidět volné místo.
+- **Stav zálohy na kartě úlohy**: Hlavní pill na kartě teď říká, zda je záloha aktuální, nebo **potřebuje zálohu** (nikdy nezálohováno, poslední běh selhal/zrušen, nebo starší než 30 dní). Pod ním je „Naposledy: … · před N dny/měsíci“. Stav připojení disků (Připraveno / Disk nepřipojený) je vedlejší řádek.
+- **Nová skupina přímo v editoru úlohy**: Výběr skupiny je vždy vidět a obsahuje **Nová skupina…**; zadáš název (předvyplněn jménem cílového disku) a úloha se uloží rovnou do nově vytvořené skupiny.
+- **Místo na disku u skupiny**: Pod názvem skupiny na stránce Úlohy je řádek „Backup 2: úlohy celkem 1,3 TB · volno 480 GB z 1,8 TB“ (součet velikostí zdrojů úloh vs. cílový disk). Když se úlohy celé nevejdou na disk, řádek zčervená. Velikosti sdílí cache s kartami úloh.
+
+### Změněno
+- **Úklid repa**: odstraněny nepoužívané hooky (`usePreviewJob`, `useRunJob`, `useCancelRun`, `useRunProgress`), zbytečné `export`y; screenshot Přehledu přejmenován na `assets/preview-overview.png`; ADR 0001 a ARCHITECTURE už nemluví o instalátoru.
+- **CI**: workflow má `permissions: contents: read` a nový job **Dependency audit** (`pnpm audit`, `cargo audit`).
+
 ### Další krok
 - Nápady na později: auto-start po připojení disku, plánovač, verzování smazaných souborů.
 

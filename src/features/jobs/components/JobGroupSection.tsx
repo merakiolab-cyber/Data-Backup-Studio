@@ -15,6 +15,7 @@ import { ds } from '@/app/theme/theme';
 import type { JobGroup, JobGroupId, JobId, JobView, RunSummary } from '@/lib/bindings';
 import { fmt, plural, useT } from '@/lib/i18n';
 import { decodeJobDrag } from '../groupLayout';
+import { GroupDiskSummary } from './GroupDiskSummary';
 import { JobCard } from './JobCard';
 
 export function JobGroupSection({
@@ -137,6 +138,7 @@ export function JobGroupSection({
           <Typography variant="subtitle1" component="h3" noWrap sx={{ fontWeight: 600 }}>
             {title}
           </Typography>
+          {group && <GroupDiskSummary jobs={jobs} />}
         </Box>
         <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, pr: 0.5 }}>
           {countLabel}

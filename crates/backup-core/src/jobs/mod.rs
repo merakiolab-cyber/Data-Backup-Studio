@@ -62,6 +62,15 @@ pub struct JobsOverview {
     pub jobs: Vec<JobView>,
 }
 
+/// Calculated size and file count of a job's source folder.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct JobSize {
+    #[specta(type = specta_typescript::Number)]
+    pub total_bytes: u64,
+    pub file_count: u32,
+}
+
 pub fn create(config: &mut Config, input: JobInput, live: &[LiveVolume]) -> CoreResult<Job> {
     let spec = prepare(config, input, live, None)?;
     let now = now_ms();
@@ -150,6 +159,39 @@ pub fn overview(config: &Config, live: &[LiveVolume]) -> JobsOverview {
         groups,
         jobs: views(config, live),
     }
+}
+
+/// Calculates the total size in bytes and number of files in the job's source folder.
+/// Returns `Ok(None)` if the source volume is disconnected, needs confirmation, or the folder is missing.
+pub fn size(config: &Config, live: &[LiveVolume], id: JobId) -> CoreResult<Option<JobSize>> {
+    let job = match config.jobs.iter().find(|j| j.id == id) {
+        Some(j) => j,
+        None => return Err(CoreError::JobNotFound),
+    };
+    let source_root = match crate::engine::resolve_location(config, live, &job.source) {
+        Ok(path) => path,
+        Err(CoreError::EndpointDisconnected | CoreError::EndpointNeedsConfirmation) => {
+            return Ok(None);
+        }
+        Err(err) => return Err(err),
+    };
+    if !source_root.is_dir() {
+        return Ok(None);
+    }
+    match measure_folder(&source_root, &job.excludes) {
+        Ok(size) => Ok(Some(size)),
+        Err(CoreError::FolderNotFound { .. } | CoreError::SourceUnavailable) => Ok(None),
+        Err(err) => Err(err),
+    }
+}
+
+/// Size and file count of any folder, honouring exclude globs (what a backup would copy).
+pub fn measure_folder(root: &std::path::Path, excludes: &[String]) -> CoreResult<JobSize> {
+    let tree = crate::engine::scan_tree(root, excludes)?;
+    Ok(JobSize {
+        total_bytes: tree.files.values().map(|f| f.size).sum::<u64>(),
+        file_count: u32::try_from(tree.files.len()).unwrap_or(u32::MAX),
+    })
 }
 
 /// Creates a group and assigns the given jobs to it.
@@ -511,5 +553,38 @@ mod tests {
         delete_group(&mut f.config, group.id).unwrap();
         assert!(f.config.groups.is_empty());
         assert!(f.config.jobs.iter().all(|job| job.group_id.is_none()));
+    }
+
+    #[test]
+    fn size_computes_source_bytes_and_file_count_respecting_excludes() {
+        let temp = tempfile::tempdir().unwrap();
+        let source_dir = temp.path().join("Fotky");
+        std::fs::create_dir_all(&source_dir).unwrap();
+        std::fs::write(source_dir.join("a.txt"), "12345").unwrap(); // 5 bytes
+        std::fs::write(source_dir.join("b.txt"), "1234567890").unwrap(); // 10 bytes
+        std::fs::write(source_dir.join("ignore.tmp"), "excluded").unwrap(); // excluded by *.tmp
+
+        let mut f = fixture();
+        f.live[0].mount_point = temp.path().to_string_lossy().to_string();
+        let job = add(&mut f, "Fotky", "Zaloha").unwrap();
+
+        let res = size(&f.config, &f.live, job.id).unwrap();
+        assert_eq!(
+            res,
+            Some(JobSize {
+                total_bytes: 15,
+                file_count: 2,
+            })
+        );
+
+        // When source volume is disconnected, returns Ok(None)
+        let unplugged = size(&f.config, &[], job.id).unwrap();
+        assert_eq!(unplugged, None);
+
+        // When job does not exist, returns Err(JobNotFound)
+        assert!(matches!(
+            size(&f.config, &f.live, JobId::new()),
+            Err(CoreError::JobNotFound)
+        ));
     }
 }

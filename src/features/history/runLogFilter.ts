@@ -11,7 +11,7 @@ const PREFIX: Record<LogActionKind, string> = {
   failure: 'selhání',
 };
 
-export function classifyLogLine(line: string): LogActionKind | 'meta' {
+function classifyLogLine(line: string): LogActionKind | 'meta' {
   const trimmed = line.trimStart();
   if (trimmed.length === 0) {
     return 'meta';

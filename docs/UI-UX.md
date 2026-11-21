@@ -23,9 +23,9 @@ s vlastními tokeny (rozhodnutí: [ADR 0004](decisions/0004-visual-style.md)). J
 ## Obrazovky
 | Obrazovka | Obsah |
 |---|---|
-| Přehled | Dlaždice; zelené **Spustit vše**; tabulka **Stáří záloh** (úloha, disk, naposledy, pill stáří, tečky běhů); Statistiky |
-| Úlohy (`#/ulohy`) | V záhlaví vedle sebe zelené „Spustit vše“ a „Nová úloha“; skupiny se plynule sbalí; klik na dlaždici ji označí (mint); výběr skupiny i všech úloh; přesun přetažením, „Přesunout do“, nebo skupinou v editoru |
-| Editor úlohy | Zdroj \| cíl; pak **režim \| název \| skupina** (3 sloupce); vyloučení poslední přes celou šířku; na úzkém okně pod sebou |
+| Přehled | Dlaždice; zelené **Spustit vše**; tabulka **Stáří záloh** (úloha, disk, naposledy, pill stáří, tečky běhů, tlačítko **Spustit** pro přímé spuštění úlohy); Statistiky |
+| Úlohy (`#/ulohy`) | V záhlaví vedle sebe zelené „Spustit vše“ a „Nová úloha“; skupiny se plynule sbalí; hlavička skupiny ukazuje součet velikostí úloh vs. volné místo cílového disku; klik na dlaždici ji označí (mint); dlaždice ukazuje velikost zdroje a počet souborů; hlavní pill = stav zálohy (mint ≤ 30 dní, peach = potřebuje zálohu), pod ním „Naposledy“ a stav disků jako vedlejší řádek; výběr skupiny i všech úloh; přesun přetažením, „Přesunout do“, nebo skupinou v editoru |
+| Editor úlohy | Zdroj \| cíl; pod nimi panel **Vejde se?** (velikost zdroje vs. volno cíle);  pak **režim \| název \| skupina** (3 sloupce; ve výběru skupiny je i „Nová skupina…“ s polem pro název); vyloučení poslední přes celou šířku; na úzkém okně pod sebou |
 | Náhled plánu | Souhrn: ponechat / kopírovat / aktualizovat / smazat (počty, objem), rozbalitelný seznam, „Spustit“ |
 | Běh | Dialog s průběhem (rychlost, ETA, soubor), **Minimalizovat** → lišta dole (`ActiveRunBar`); „Zrušit“ reaguje i uprostřed velkého souboru; další úlohy do fronty (ADR 0010) |
 | Disky | Karty cílových disků (mint = připojený, lemon = potřebuje ověřit, bílá = nepřipojený); od dvou disků **přetažením** změníš pořadí zobrazení; seznam externích a interních disků s „Registrovat“ |

@@ -2,7 +2,7 @@ import type { BusKind, ConfirmReason, LiveVolume } from '@/lib/bindings';
 import { formatBytes } from '@/lib/format';
 import type { Messages } from '@/lib/i18n';
 
-export function busLabel(bus: BusKind, t: Messages): string {
+function busLabel(bus: BusKind, t: Messages): string {
   switch (bus) {
     case 'usb':
       return 'USB';

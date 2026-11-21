@@ -58,6 +58,10 @@ vi.mock('@/lib/bindings', () => ({
   commands: {
     listVolumes: vi.fn(async () => ({ status: 'ok', data: volumes })),
     listJobs: vi.fn(async () => ({ status: 'ok', data: { groups: [], jobs } })),
+    getJobSize: vi.fn(async () => ({
+      status: 'ok',
+      data: { totalBytes: 2_500_000, fileCount: 3 },
+    })),
     listRuns: vi.fn(async () => ({ status: 'ok', data: [lastRun] })),
     getRun: vi.fn(async () => ({ status: 'ok', data: { run: lastRun, errors: [] } })),
   },
@@ -87,7 +91,11 @@ describe('JobsPage', () => {
     renderPage(<JobsPage />);
     const ready = await screen.findByRole('article', { name: 'Fotky' });
     expect(within(ready).getByText('G:\\Záloha\\Fotky')).toBeInTheDocument();
+    expect(within(ready).getByText('Záloha je aktuální')).toBeInTheDocument();
     expect(within(ready).getByText('Připraveno')).toBeInTheDocument();
+    expect(
+      await within(ready).findByText(/Velikost zdroje: 2,4.MB \(3 soubory\)/),
+    ).toBeInTheDocument();
     expect(within(ready).getByText(/Hotovo dnes/)).toBeInTheDocument();
 
     const waiting = screen.getByRole('article', { name: 'Archiv' });
@@ -133,12 +141,17 @@ describe('JobsPage', () => {
 });
 
 describe('OverviewPage', () => {
-  it('summarizes jobs without listing them', async () => {
+  it('summarizes jobs without listing them as articles and allows running ready jobs directly', async () => {
     renderPage(<OverviewPage />);
     expect(await screen.findByText('Úlohy připravené ke spuštění')).toBeInTheDocument();
     expect(screen.getByRole('article', { name: 'Statistiky' })).toBeInTheDocument();
     expect(screen.getByText('Zálohy v historii')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Spustit vše' })).toBeEnabled();
     expect(screen.queryByRole('article', { name: 'Fotky' })).not.toBeInTheDocument();
+
+    const readyBtn = screen.getByRole('button', { name: 'Spustit úlohu Fotky' });
+    expect(readyBtn).toBeEnabled();
+    const disabledBtn = screen.getByRole('button', { name: 'Spustit úlohu Archiv' });
+    expect(disabledBtn).toBeDisabled();
   });
 });

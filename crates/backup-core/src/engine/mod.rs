@@ -14,6 +14,7 @@ use plan::Plan;
 pub use execute::{RunPhase, RunProgress, RunResult};
 pub use plan::{PlanActionKind, PlanActionView, PlanSummary, PlanView};
 pub use preflight::resolve_location;
+pub use scan::{TreeIndex, scan_tree};
 
 use crate::domain::JobId;
 use crate::storage::Config;

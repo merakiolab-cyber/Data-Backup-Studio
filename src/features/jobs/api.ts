@@ -1,18 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useEffect, useState } from 'react';
-import { runsKey } from '@/features/history/api';
 import {
   commands,
-  events,
   type JobGroupId,
   type JobId,
   type JobInput,
   type LocatedFolder,
   type Location,
-  type PlanView,
-  type RunProgress,
-  type RunResult,
 } from '@/lib/bindings';
 import { unwrap } from '@/lib/result';
 
@@ -24,6 +19,40 @@ export function useJobs() {
     queryKey: jobsKey,
     queryFn: async () => unwrap(await commands.listJobs()),
     refetchOnWindowFocus: true,
+  });
+}
+
+/** Source folder size; a full scan, so it is cached and only fetched while the source is connected. */
+export function jobSizeQuery(id: JobId, enabled: boolean) {
+  return {
+    queryKey: ['job-size', id],
+    queryFn: async () => unwrap(await commands.getJobSize(id)),
+    enabled,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  } as const;
+}
+
+export function useJobSize(id: JobId, enabled: boolean) {
+  return useQuery(jobSizeQuery(id, enabled));
+}
+
+/** Size of a folder not yet saved as a job (editor "does it fit" check). `path` is null until picked. */
+export function useFolderSize(path: string | null, excludes: string[]) {
+  const key = JSON.stringify(excludes);
+  const [debounced, setDebounced] = useState(key);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(key), 600);
+    return () => clearTimeout(timer);
+  }, [key]);
+  return useQuery({
+    queryKey: ['folder-size', path, debounced],
+    queryFn: async () =>
+      unwrap(await commands.measureFolder(path ?? '', JSON.parse(debounced) as string[])),
+    enabled: path !== null,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 }
 
@@ -70,58 +99,6 @@ export function useSetJobsGroup() {
     async ({ jobIds, groupId }: { jobIds: JobId[]; groupId: JobGroupId | null }) =>
       unwrap(await commands.setJobsGroup(jobIds, groupId)),
   );
-}
-
-export function usePreviewJob() {
-  return useMutation({
-    mutationFn: async (id: JobId): Promise<PlanView> => unwrap(await commands.previewJob(id)),
-  });
-}
-
-export function useRunJob() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      id,
-      confirmDeleteOverThreshold,
-    }: {
-      id: JobId;
-      confirmDeleteOverThreshold: boolean;
-    }): Promise<RunResult> => unwrap(await commands.runJob(id, confirmDeleteOverThreshold)),
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: jobsKey }),
-        queryClient.invalidateQueries({ queryKey: runsKey }),
-      ]),
-  });
-}
-
-export function useCancelRun() {
-  return useMutation({
-    mutationFn: async () => unwrap(await commands.cancelRun()),
-  });
-}
-
-/** Live progress while a backup runs (null when idle). */
-export function useRunProgress(active: boolean): RunProgress | null {
-  const [progress, setProgress] = useState<RunProgress | null>(null);
-  useEffect(() => {
-    if (!active) {
-      setProgress(null);
-      return;
-    }
-    let cancelled = false;
-    const unlisten = events.runProgressEvent.listen((event) => {
-      if (!cancelled) {
-        setProgress(event.payload.progress);
-      }
-    });
-    return () => {
-      cancelled = true;
-      void unlisten.then((stop) => stop());
-    };
-  }, [active]);
-  return progress;
 }
 
 /** Opens a job folder in Explorer. The backend resolves `Location` to the current mount. */

@@ -97,3 +97,12 @@ export function jobFreshnessRows(
       };
     });
 }
+
+/** A backup is due when there is none, the last run did not finish, or it is over `STALE_DAYS` old. */
+export function needsBackup(level: FreshnessLevel, daysSince: number | null): boolean {
+  if (level === 'never' || level === 'failed' || level === 'cancelled' || level === 'stale') {
+    return true;
+  }
+  // A "no changes" check is only proof of being in sync on the day it ran.
+  return (daysSince ?? 0) > STALE_DAYS;
+}
