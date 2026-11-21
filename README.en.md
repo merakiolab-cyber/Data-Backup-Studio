@@ -9,7 +9,7 @@ Offline Windows desktop app for backing up folders from your PC to external USB 
 - **Plain files** – backups are normal folders you can open without the app.
 - **Safety first** – preview before run, guards against accidental mass deletes, no network.
 
-![Data Backup Studio overview: volume and job tiles, statistics card](assets/abckup-preview.png)
+![Data Backup Studio overview: volume and job tiles, statistics card](assets/preview-overview.png)
 
 <details>
 <summary>More screens</summary>

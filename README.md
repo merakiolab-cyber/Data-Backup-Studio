@@ -9,7 +9,7 @@ Offline desktopová aplikace pro Windows na zálohování složek z disků poč�
 - **Soubory 1:1** – záloha je běžná složka, otevřeš ji i bez aplikace.
 - **Bezpečné** – náhled před spuštěním, pojistky proti nechtěnému smazání, žádná síť.
 
-![Přehled Data Backup Studio: dlaždice, stáří záloh a statistiky; ukázková data](assets/abckup-preview.png)
+![Přehled Data Backup Studio: dlaždice, stáří záloh a statistiky; ukázková data](assets/preview-overview.png)
 
 <details>
 <summary>Další obrazovky</summary>

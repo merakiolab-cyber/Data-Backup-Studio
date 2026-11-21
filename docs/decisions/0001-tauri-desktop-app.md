@@ -15,6 +15,6 @@ Zvažované alternativy:
 - **.NET WPF/WinUI** – nativní, ale pomalejší vývoj moderního UI, .NET SDK není nainstalováno.
 
 ## Důsledky
-- Malý instalátor, nízká spotřeba, vysoký výkon enginu.
+- Malý výstup (~10 MB), nízká spotřeba, vysoký výkon enginu.
 - Vývoj ve dvou jazycích (Rust + TS); rozhraní mezi nimi typované přes `tauri-specta`.
-- Závislost na WebView2 – řešeno přibalením offline instalátoru WebView2.
+- Závislost na WebView2 – je součástí Windows 11 (na Windows 10 stačí běžný Evergreen runtime); aplikace se distribuuje jako portable `.exe` (viz ARCHITECTURE).

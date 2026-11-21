@@ -19,7 +19,7 @@ jednotky** – disky se identifikují podle vlastní identity, takže změna `F:
 
 | Vrstva | Technologie | Proč |
 |---|---|---|
-| Aplikační shell | **Tauri 2** | Malý instalátor (~10 MB), nízká RAM, nativní okno přes WebView2, žádný server, žádná síť |
+| Aplikační shell | **Tauri 2** | Malý výstup (~10 MB), nízká RAM, nativní okno přes WebView2, žádný server, žádná síť |
 | Backend / engine | **Rust (stable)** | Rychlost blízká C, bezpečnost paměti, snadný paralelismus, přímý přístup k Win32 API |
 | Win32 API | crate `windows` | Enumerace svazků, sériová čísla, GUID svazků, volné místo |
 | Procházení disku | `jwalk` (paralelní walk) | Rychlé skenování stovek tisíc souborů |
